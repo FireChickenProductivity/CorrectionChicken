@@ -92,7 +92,7 @@ class Actions:
             occurrences = [homophone.count(character) for homophone in homophones]
             index = occurrences.index(max(occurrences))
             words[word_number - 1] = homophones[index]
-            actions.user.correction_chicken_replace_text_with_words(words), 
+            actions.user.correction_chicken_replace_text_with_words(words)
     
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):
