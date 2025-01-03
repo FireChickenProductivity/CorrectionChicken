@@ -55,7 +55,13 @@ class Actions:
                     words.append(word)
                     if number == 1:
                         phrase_numbering += " "
-                    phrase_numbering += f"({number}) {word} "
+                    phrase_numbering += f"({number}"
+                    homophones = actions.user.correction_chicken_get_homophones(word)
+                    if len(homophones) == 2:
+                        phrase_numbering += "!"
+                    elif len(homophones) > 2:
+                        phrase_numbering += "*"
+                    phrase_numbering += f") {word} "
                     word = ""
 
                     number += 1
@@ -110,8 +116,22 @@ class Actions:
         words.pop(word_number - 1)
         actions.user.correction_chicken_replace_text_with_words(words)
 
-    def correction_chicken_homophones_advance_word(word_number: int):
+    def correction_chicken_get_last_word_with_homophones_number():
+        """Get the number of the last word that is a homophone"""
+        global words
+        for index in range(len(words) - 1, -1, -1):
+            word = words[index]
+            if actions.user.correction_chicken_get_homophones(word):
+                return index + 1
+        return -1
+
+    def correction_chicken_homophones_advance_word(word_number: int=0):
         """Advance the word to the next homophone"""
+        if word_number == 0:
+            word_number = actions.user.correction_chicken_get_last_word_with_homophones_number()
+            if word_number == -1:
+                return
+
         global words
         word = words[word_number - 1].lower()
         homophones = actions.user.correction_chicken_get_homophones(word)
