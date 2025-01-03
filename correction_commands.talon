@@ -21,3 +21,6 @@ phony <number_small>:
 
 phony <user.letter> <number_small>:
     user.correction_chicken_change_word_to_homophone_with_most_occurrences_of_character(number_small, user.letter)
+
+phony <user.letter>+ <number_small>:
+    user.correction_chicken_change_word_to_homophone_containing_characters(number_small, user.letter_list)

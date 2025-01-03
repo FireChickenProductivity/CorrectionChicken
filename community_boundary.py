@@ -13,4 +13,4 @@ class Actions:
 
     def correction_chicken_get_homophones(word: str):
         """Get the homophones for the specified word"""
-        return actions.user.homophones_get(word)
+        return actions.user.homophones_get(word)[:]

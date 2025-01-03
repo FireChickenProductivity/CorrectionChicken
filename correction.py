@@ -77,22 +77,44 @@ class Actions:
         global words
         word = words[word_number - 1]
         homophones = actions.user.correction_chicken_get_homophones(word)
+        print('homophones', actions.user.homophones_get(word), word)
         if homophones:
             index = homophones.index(word)
             index = (index + 1) % len(homophones)
             words[word_number - 1] = homophones[index]
             actions.user.correction_chicken_replace_text_with_words(words)
+        
+    def correction_chicken_get_homophones_other_than_word(word: str):
+        """Get the homophones for the specified word other than the word itself"""
+        homophones = actions.user.correction_chicken_get_homophones(word)
+        homophones.remove(word.lower())
+        return homophones
 
     def correction_chicken_change_word_to_homophone_with_most_occurrences_of_character(word_number: int, character: str):
         """Change the word to the homophone with the most occurrences of the specified character"""
         global words
         word = words[word_number - 1]
-        homophones = actions.user.correction_chicken_get_homophones(word)
+        homophones = actions.user.correction_chicken_get_homophones_other_than_word(word)
+        print('homophones', homophones)
         if homophones:
             occurrences = [homophone.count(character) for homophone in homophones]
             index = occurrences.index(max(occurrences))
             words[word_number - 1] = homophones[index]
             actions.user.correction_chicken_replace_text_with_words(words)
+
+    def correction_chicken_change_word_to_homophone_containing_characters(word_number: int, characters: List[str]):
+        """Change the word to the homophone containing the specified characters"""
+        global words
+        word = words[word_number - 1]
+        homophones = actions.user.correction_chicken_get_homophones_other_than_word(word)
+        sub_string = "".join(characters)
+        print('homophones', homophones, 'sub_string', sub_string)
+        if homophones:
+            for homophone in homophones:
+                if sub_string in homophone:
+                    words[word_number - 1] = homophone
+                    actions.user.correction_chicken_replace_text_with_words(words)
+                    break
     
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):
