@@ -24,3 +24,6 @@ phony <user.letter> <number_small>:
 
 phony <user.letter>+ <number_small>:
     user.correction_chicken_change_word_to_homophone_containing_characters(number_small, user.letter_list)
+
+court <number_small>:
+    user.correction_chicken_perform_correction(number_small)

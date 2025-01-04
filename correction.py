@@ -4,6 +4,8 @@ from typing import List
 last_phrase = ""
 phrase_numbering = ""
 words = []
+corrections = []
+correction_texts = []
 
 class Casing:
     UPPERCASE = 1
@@ -40,7 +42,7 @@ module = Module()
 class Actions:
     def correction_chicken_update_last_phrase(phrase: str):
         """Update the last phrase dictated"""
-        global last_phrase, phrase_numbering, words
+        global last_phrase, phrase_numbering, words, corrections, correction_texts
         if phrase != last_phrase:
             actions.user.correction_chicken_set_last_phrase(phrase)
             words = []
@@ -67,6 +69,8 @@ class Actions:
                     number += 1
                 else:
                     word += character
+            corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase)
+            correction_texts = [correction.original + " -> " + correction.replacement for correction in corrections]
 
     def correction_chicken_replace_text(replacement: str):
         """Replace the phrase with the specified text"""
@@ -167,9 +171,23 @@ class Actions:
                 if sub_string in homophone:
                     actions.user.correction_chicken_replace_word_with_same_casing(word_number, homophone)
                     break
+
+    def correction_chicken_perform_correction(correction_number: int):
+        """Perform the specified correction"""
+        global corrections
+        correction = corrections[correction_number - 1]
+        replacement = correction.replacement
+        index = correction.starting_index
+        new_text = last_phrase[:index] + replacement
+        post_index = index + len(correction.original)
+        if post_index < len(last_phrase):
+            new_text += last_phrase[index + len(correction.original):]
+        actions.user.correction_chicken_replace_text(new_text)
     
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):
     global last_phrase, phrase_numbering
     gui.text(phrase_numbering)
     gui.line()
+    for index, correction_text in enumerate(correction_texts):
+        gui.text(f"{index + 1}. {correction_text}")
