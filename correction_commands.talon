@@ -1,3 +1,6 @@
+mode: command
+mode: dictation
+-
 trim <number_small>:
     user.correction_chicken_remove_characters_from_word(number_small, 1)
 
