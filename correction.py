@@ -6,6 +6,8 @@ phrase_numbering = ""
 words = []
 corrections = []
 correction_texts = []
+replacement = ""
+current_editing_word_number_range = None
 
 def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):
     for i in range(len(prefix), 0, -1):
@@ -99,6 +101,28 @@ class Actions:
         words[index - 1] = casing.convert(replacement)
         actions.user.correction_chicken_replace_text_with_words(words)
 
+    def correction_chicken_replace_words_with_same_casing(index_range: List[int], replacement: str):
+        """Replace the specified words with the specified replacement using the same casing"""
+        global words
+        start_number, end_number = index_range
+        relevant_words = words[start_number - 1:end_number]
+        new_words = []
+        replacement_words = replacement.split(" ")
+        if len(replacement_words) <= len(relevant_words):
+            for index, word in enumerate(replacement_words):
+                relevant_word = relevant_words[index]
+                casing = Casing(relevant_word)
+                new_words.append(casing.convert(replacement_words[index]))
+        else:
+            #This branch has not been tested yet
+            for index, word in enumerate(relevant_words):
+                casing = Casing(word)
+                new_words.append(casing.convert(replacement_words[index]))
+            for replacement_word in replacement_words[len(relevant_words):]:
+                new_words.append(casing.convert(replacement_word))
+        words[start_number - 1:end_number] = new_words
+        actions.user.correction_chicken_replace_text_with_words(words)
+
     def correction_chicken_remove_characters_from_word(word_number: int, characters: int):
         """Remove the specified number of characters from the specified word"""
         global words
@@ -124,6 +148,52 @@ class Actions:
         """Remove the specified word"""
         global words
         words.pop(word_number - 1)
+        actions.user.correction_chicken_replace_text_with_words(words)
+
+    def correction_chicken_spell_out_alternative_for_word(characters: List[str], word_number: int=None):
+        """Spell out the alternative for the specified word"""
+        global current_editing_word_number_range, replacement
+        if word_number is not None:
+            current_editing_word_number_range = word_number
+        replacement = "".join(characters)
+    
+    def correction_chicken_choose_word_for_replacement(word_number: int):
+        """Update the current word for replacement"""
+        global current_editing_word_number_range
+        current_editing_word_number_range = word_number
+
+    def fire_chicken_choosing_range_for_replacement(start_word_number: int, end_word_number: int):
+        """Choose the range of words for replacement"""
+        global current_editing_word_number_range
+        current_editing_word_number_range = (start_word_number, end_word_number)
+
+    def correction_chicken_make_replacement():
+        """Make the replacement for the current word"""
+        global current_editing_word_number_range, replacement
+        if current_editing_word_number_range is not None and replacement:
+            if type(current_editing_word_number_range) == int:
+                actions.user.correction_chicken_replace_word_with_same_casing(current_editing_word_number_range, replacement)
+            else:
+                actions.user.correction_chicken_replace_words_with_same_casing(current_editing_word_number_range, replacement)
+            current_editing_word_number_range = None
+            replacement = ""
+
+    def correction_chickens_save_replacement_as_correction_rule():
+        """Saves the current replacement as a correction rule"""
+        global current_editing_word_number_range, replacement
+        if current_editing_word_number_range is not None and replacement:
+            if type(current_editing_word_number_range) == int:
+                original = words[current_editing_word_number_range - 1]
+            else:
+                original = " ".join(words[current_editing_word_number_range[0] - 1:current_editing_word_number_range[1]])
+            actions.user.correction_chicken_add_correction_rule(original, replacement)
+
+    def correction_chicken_add_missing_text_to_the_end(word_number: int, text: str):
+        """Make the ending of the word match the text preserving already present characters"""
+        global words
+        word = words[word_number - 1]
+        biggest_prefix_size = compute_biggest_prefix_size_at_the_end_of_text(word, text)
+        words[word_number - 1] += text[biggest_prefix_size:]
         actions.user.correction_chicken_replace_text_with_words(words)
 
     def correction_chicken_get_last_word_with_homophones_number():
@@ -184,24 +254,26 @@ class Actions:
         correction = corrections[correction_number - 1]
         replacement = correction.replacement
         index = correction.starting_index
-        new_text = last_phrase[:index] + replacement
         post_index = index + len(correction.original)
+        if not correction.casing_override:
+            original_text_getting_replaced = last_phrase[index:post_index]
+            casing = Casing(original_text_getting_replaced)
+            replacement = casing.convert(replacement)
+        new_text = last_phrase[:index] + replacement
         if post_index < len(last_phrase):
             new_text += last_phrase[index + len(correction.original):]
         actions.user.correction_chicken_replace_text(new_text)
     
-    def correction_chicken_add_missing_text_to_the_end(word_number: int, text: str):
-        """Make the ending of the word match the text preserving already present characters"""
-        global words
-        word = words[word_number - 1]
-        biggest_prefix_size = compute_biggest_prefix_size_at_the_end_of_text(word, text)
-        words[word_number - 1] += text[biggest_prefix_size:]
-        actions.user.correction_chicken_replace_text_with_words(words)
-    
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):
-    global last_phrase, phrase_numbering
+    global last_phrase, phrase_numbering, replacement, current_editing_word_number_range
     gui.text(phrase_numbering)
     gui.line()
     for index, correction_text in enumerate(correction_texts):
         gui.text(f"{index + 1}. {correction_text}")
+    if replacement:
+        gui.line()
+        gui.text(replacement)
+    if current_editing_word_number_range:
+        gui.line()
+        gui.text(current_editing_word_number_range)

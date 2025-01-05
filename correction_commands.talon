@@ -33,3 +33,21 @@ phony <user.letter>+ <number_small>:
 
 court <number_small>:
     user.correction_chicken_perform_correction(number_small)
+
+spelling <number_small> <user.letter>+:
+    user.correction_chicken_spell_out_alternative_for_word(user.letter_list, number_small)
+
+spelling <user.letter>+:
+    user.correction_chicken_spell_out_alternative_for_word(user.letter_list)
+
+spelling <number_small>:
+    user.correction_chicken_choose_word_for_replacement(number_small)
+
+spelling <number_small> through <number_small>:
+    user.fire_chicken_choosing_range_for_replacement(number_small_1, number_small_2)
+
+accept (place|replace|replacement): user.correction_chicken_make_replacement()
+
+save (place|replace|replacement):
+    user.correction_chickens_save_replacement_as_correction_rule()
+    user.correction_chicken_make_replacement()

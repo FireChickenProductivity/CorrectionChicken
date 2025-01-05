@@ -110,6 +110,6 @@ class Actions:
 
     def correction_chicken_add_correction_rule(original: str, replacement: str, case_override: str=""):
         """Add a correction rule"""
-        with open((os.path.join(CORRECTION_DIRECTORY, 'added')), "a") as file:
+        with open((os.path.join(CORRECTION_DIRECTORY, 'added.csv')), "a") as file:
             writer = csv.writer(file)
             writer.writerow([original, replacement, case_override])
