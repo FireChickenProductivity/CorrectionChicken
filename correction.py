@@ -7,6 +7,12 @@ words = []
 corrections = []
 correction_texts = []
 
+def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):
+    for i in range(len(prefix), 0, -1):
+        if text.endswith(prefix[:i]):
+            return i
+    return 0
+
 class Casing:
     UPPERCASE = 1
     LOWERCASE = 2
@@ -183,6 +189,14 @@ class Actions:
         if post_index < len(last_phrase):
             new_text += last_phrase[index + len(correction.original):]
         actions.user.correction_chicken_replace_text(new_text)
+    
+    def correction_chicken_add_missing_text_to_the_end(word_number: int, text: str):
+        """Make the ending of the word match the text preserving already present characters"""
+        global words
+        word = words[word_number - 1]
+        biggest_prefix_size = compute_biggest_prefix_size_at_the_end_of_text(word, text)
+        words[word_number - 1] += text[biggest_prefix_size:]
+        actions.user.correction_chicken_replace_text_with_words(words)
     
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):

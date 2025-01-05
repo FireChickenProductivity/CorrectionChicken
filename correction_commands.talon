@@ -19,6 +19,9 @@ correction chicken:
 remove <number_small>:
     user.correction_chicken_remove_word(number_small)
 
+Eddie <number_small>:
+    user.correction_chicken_add_missing_text_to_the_end(number_small, "ed")
+
 phony [<number_small>]:
     user.correction_chicken_homophones_advance_word(number_small or 0)
 
