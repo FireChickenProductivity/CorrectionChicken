@@ -46,8 +46,14 @@ spelling <number_small>:
 spelling <number_small> through <number_small>:
     user.fire_chicken_choosing_range_for_replacement(number_small_1, number_small_2)
 
-accept (place|replace|replacement): user.correction_chicken_make_replacement()
+phrasing <user.prose>:
+    user.correction_chicken_set_replacement(prose)
 
-save (place|replace|replacement):
+wording <user.word>:
+    user.correction_chicken_set_replacement(word)
+
+(place|replace|replacement) accept|replace: user.correction_chicken_make_replacement()
+
+(place|replace|replacement) save: 
     user.correction_chickens_save_replacement_as_correction_rule()
     user.correction_chicken_make_replacement()

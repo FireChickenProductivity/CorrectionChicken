@@ -157,6 +157,11 @@ class Actions:
             current_editing_word_number_range = word_number
         replacement = "".join(characters)
     
+    def correction_chicken_set_replacement(new_replacement: str):
+        """Set the replacement"""
+        global replacement
+        replacement = new_replacement
+
     def correction_chicken_choose_word_for_replacement(word_number: int):
         """Update the current word for replacement"""
         global current_editing_word_number_range
