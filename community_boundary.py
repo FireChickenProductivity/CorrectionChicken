@@ -7,6 +7,10 @@ class Actions:
         """Get the last phrase dictated"""
         return actions.user.get_last_phrase()
 
+    def correction_chicken_get_selected_text() -> str:
+        """Get the selected text"""
+        return actions.edit.selected_text()
+
     def correction_chicken_set_last_phrase(phrase: str):
         """Sets the last phrase"""
         actions.user.add_phrase_to_history(phrase)

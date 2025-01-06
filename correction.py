@@ -102,6 +102,12 @@ class Actions:
             corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase)
             correction_texts = [correction.original + " -> " + correction.replacement for correction in corrections]
 
+    def correction_chicken_set_last_phrase_to_selected_text():
+        """Set the last phrase to the selected text"""
+        selected_text = actions.user.correction_chicken_get_selected_text()
+        actions.edit.right()
+        actions.user.correction_chicken_update_last_phrase(selected_text)
+
     def correction_chicken_replace_text(replacement: str):
         """Replace the phrase with the specified text"""
         global last_phrase
