@@ -25,8 +25,14 @@ Eddie <number_small>:
 phony [<number_small>]:
     user.correction_chicken_homophones_advance_word(number_small or 0)
 
+phony <user.letter>:
+    user.correction_chicken_changed_last_homophone_with_character_to_alternative_with_most_instances_of_that_character(user.letter)
+
 phony <user.letter> <number_small>:
     user.correction_chicken_change_word_to_homophone_with_most_occurrences_of_character(number_small, user.letter)
+
+phony <user.letter>+ :
+    user.correction_chicken_change_last_homophone_with_alternative_containing_characters(user.letter_list)
 
 phony <user.letter>+ <number_small>:
     user.correction_chicken_change_word_to_homophone_containing_characters(number_small, user.letter_list)
