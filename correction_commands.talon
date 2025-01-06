@@ -63,3 +63,10 @@ wording <user.word>:
 (place|replace|replacement) save: 
     user.correction_chickens_save_replacement_as_correction_rule()
     user.correction_chicken_make_replacement()
+
+correct that:
+    user.correction_chicken_set_last_phrase_to_selected_text()
+
+correct line:
+    edit.select_line()
+    user.correction_chicken_set_last_phrase_to_selected_text()
