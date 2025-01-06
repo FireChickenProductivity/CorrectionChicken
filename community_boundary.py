@@ -15,5 +15,6 @@ class Actions:
         """Get the homophones for the specified word"""
         phones = actions.user.homophones_get(word)
         if phones:
+            phones = [phone.lower() for phone in phones]
             return phones[:]
         return []

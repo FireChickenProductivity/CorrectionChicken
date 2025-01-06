@@ -9,6 +9,28 @@ correction_texts = []
 replacement = ""
 current_editing_word_number_range = None
 
+class Tokens:
+    def __init__(self, text):
+        self.tokens = text.split(" ")
+
+    def get_token(self, index):
+        return self.tokens[index]
+
+    def get_size(self):
+        return len(self.tokens)
+    
+    def get_text(self):
+        return " ".join(self.tokens)
+
+    def set_token(self, index: int, token: str):
+        self.tokens[index] = token
+
+    def get_tokens(self, start_index, end_index):
+        return self.tokens[start_index:end_index]
+
+    def set_tokens(self, start_index, end_index, tokens):
+        self.tokens[start_index:end_index] = tokens
+
 def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):
     for i in range(len(prefix), 0, -1):
         if text.endswith(prefix[:i]):
@@ -228,8 +250,8 @@ class Actions:
     def correction_chicken_get_homophones_other_than_word(word: str):
         """Get the homophones for the specified word other than the word itself"""
         homophones = actions.user.correction_chicken_get_homophones(word)
-        homophones.remove(word.lower())
-        return homophones
+        result = [homophone for homophone in homophones if homophone != word.lower()]
+        return result
 
     def correction_chicken_change_word_to_homophone_with_most_occurrences_of_character(word_number: int, character: str):
         """Change the word to the homophone with the most occurrences of the specified character"""
@@ -252,6 +274,32 @@ class Actions:
                 if sub_string in homophone:
                     actions.user.correction_chicken_replace_word_with_same_casing(word_number, homophone)
                     break
+    
+    def correction_chicken_change_last_homophone_with_alternative_containing_characters(characters: List[str]):
+        """Find the last word with a homophone containing the specified characters and change it to that homophone"""
+        global words
+        sub_string = "".join(characters)
+        for index in range(len(words) - 1, -1, -1):
+            homophones = actions.user.correction_chicken_get_homophones_other_than_word(words[index])
+            if homophones:
+                for homophone in homophones:
+                    if sub_string in homophone:
+                        word_number = index + 1
+                        actions.user.correction_chicken_replace_word_with_same_casing(word_number, homophone)
+                        return
+
+    def correction_chicken_changed_last_homophone_with_character_to_alternative_with_most_instances_of_that_character(character: str):
+        """Find the last word with a homophone containing the specified character and change it to the homophone with the most instances of that character"""
+        global words
+        for index in range(len(words) - 1, -1, -1):
+            homophones = actions.user.correction_chicken_get_homophones_other_than_word(words[index])
+            if homophones:
+                occurrences = [homophone.count(character) for homophone in homophones]
+                best_index = occurrences.index(max(occurrences))
+                if occurrences[best_index] > 0:
+                    word_number = index + 1
+                    actions.user.correction_chicken_replace_word_with_same_casing(word_number, homophones[best_index])
+                    return
 
     def correction_chicken_perform_correction(correction_number: int):
         """Perform the specified correction"""
