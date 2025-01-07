@@ -3,7 +3,6 @@ from typing import List
 
 last_phrase = ""
 phrase_numbering = ""
-words = []
 tokens = None
 corrections = []
 correction_texts = []
@@ -166,25 +165,25 @@ class Actions:
 
     def correction_chicken_replace_words_with_same_casing(index_range: List[int], replacement: str):
         """Replace the specified words with the specified replacement using the same casing"""
-        global words
+        global tokens
         start_number, end_number = index_range
-        relevant_words = words[start_number - 1:end_number]
-        new_words = []
+        relevant_tokens = tokens.get_tokens(start_number - 1, end_number)
+        new_tokens = []
         replacement_words = replacement.split(" ")
-        if len(replacement_words) <= len(relevant_words):
-            for index, word in enumerate(replacement_words):
-                relevant_word = relevant_words[index]
+        if len(replacement_words) <= len(relevant_tokens):
+            for index, token in enumerate(replacement_words):
+                relevant_word = relevant_tokens[index]
                 casing = Casing(relevant_word)
-                new_words.append(casing.convert(replacement_words[index]))
+                new_tokens.append(casing.convert(replacement_words[index]))
         else:
             #This branch has not been tested yet
-            for index, word in enumerate(relevant_words):
-                casing = Casing(word)
-                new_words.append(casing.convert(replacement_words[index]))
-            for replacement_word in replacement_words[len(relevant_words):]:
-                new_words.append(casing.convert(replacement_word))
-        words[start_number - 1:end_number] = new_words
-        actions.user.correction_chicken_replace_text_with_words(words)
+            for index, token in enumerate(relevant_tokens):
+                casing = Casing(token)
+                new_tokens.append(casing.convert(replacement_words[index]))
+            for replacement_word in replacement_words[len(relevant_tokens):]:
+                new_tokens.append(casing.convert(replacement_word))
+        tokens.set_tokens(start_number - 1, end_number, new_tokens)
+        actions.user.correction_chicken_replace_text_with_tokens()
 
     def correction_chicken_remove_characters_from_word(word_number: int, characters: int):
         """Remove the specified number of characters from the specified word"""
