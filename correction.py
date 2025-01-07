@@ -136,9 +136,7 @@ def create_tokens_with_matching_casing(replacement_tokens, relevant_tokens, last
                     next_index += 1
                 if next_index < len(relevant_tokens):
                     next_casing = Casing(relevant_tokens[next_index])
-                else:
-                    next_casing = after_casing
-            else:
+            if next_index >= len(relevant_tokens):
                 next_casing = after_casing
             casing = compute_casing_based_on_neighbors(last_casing, replacement_token, next_casing)
         converted_token = casing.convert(replacement_token)
