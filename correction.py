@@ -74,6 +74,56 @@ class Tokens:
     def __str__(self):
         return " ".join(self.tokens)
 
+    def __eq__(self, value: object) -> bool:
+        return self.tokens == value.tokens
+
+def compute_casing_based_on_neighbors(last_casing, replacement_token, next_casing):
+    if not last_casing and not next_casing:
+        casing = Casing(replacement_token)
+    elif not next_casing:
+        casing = last_casing
+    elif (not last_casing) or last_casing == next_casing:
+        casing = next_casing
+    elif last_casing < next_casing:
+        casing = last_casing
+    else:
+        casing = next_casing
+    return casing
+
+def replace_tokens_with_matching_casing(tokens: Tokens, index_range, replacement: str):
+    start_number, end_number = index_range
+    relevant_tokens = tokens.get_tokens(start_number - 1, end_number)
+    new_tokens = []
+    tokens_for_replacement = Tokens(replacement)
+    replacement_tokens = tokens_for_replacement.get_tokens(0, tokens_for_replacement.get_size())
+    if start_number == 1 and tokens.get_token(0).isalpha():
+        last_casing = Casing(tokens.get_token(0))
+    else:
+        last_casing = None
+    if end_number == tokens.get_size() and tokens.get_token(end_number - 1).isalpha():
+        after_casing = Casing(tokens.get_token(end_number - 1))
+    else:
+        after_casing = None
+    next_index = 0
+    for index, replacement_token in enumerate(replacement_tokens):
+        if index < len(relevant_tokens) and relevant_tokens[index].isalpha():
+            casing = Casing(relevant_tokens[index])
+        else:
+            if next_index <= index:
+                while (next_index < len(relevant_tokens) and not relevant_tokens[next_index].isalpha()) or next_index <= index:
+                    next_index += 1
+                if next_index < len(relevant_tokens):
+                    next_casing = Casing(relevant_tokens[next_index])
+                else:
+                    next_casing = after_casing
+            else:
+                next_casing = after_casing
+            casing = compute_casing_based_on_neighbors(last_casing, replacement_token, next_casing)
+        converted_token = casing.convert(replacement_token)
+        new_tokens.append(converted_token)
+        last_casing = casing
+    tokens.set_tokens(start_number - 1, end_number, new_tokens)
+
 def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):
     for i in range(len(prefix), 0, -1):
         if text.endswith(prefix[:i]):
@@ -81,9 +131,9 @@ def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):
     return 0
 
 class Casing:
-    UPPERCASE = 1
-    LOWERCASE = 2
-    CAPITALIZED = 3
+    LOWERCASE = 1
+    CAPITALIZED = 2
+    UPPERCASE = 3
     OTHER = 4
     def __init__(self, word: str):
         self.word = word
@@ -109,6 +159,11 @@ class Casing:
         else:
             return word
 
+    def __eq__(self, value: object) -> bool:
+        return self.casing == value.casing
+
+    def __lt__(self, value: object) -> bool:
+        return self.casing < value.casing
 
 module = Module()
 @module.action_class
@@ -166,23 +221,7 @@ class Actions:
     def correction_chicken_replace_words_with_same_casing(index_range: List[int], replacement: str):
         """Replace the specified words with the specified replacement using the same casing"""
         global tokens
-        start_number, end_number = index_range
-        relevant_tokens = tokens.get_tokens(start_number - 1, end_number)
-        new_tokens = []
-        replacement_words = replacement.split(" ")
-        if len(replacement_words) <= len(relevant_tokens):
-            for index, token in enumerate(replacement_words):
-                relevant_word = relevant_tokens[index]
-                casing = Casing(relevant_word)
-                new_tokens.append(casing.convert(replacement_words[index]))
-        else:
-            #This branch has not been tested yet
-            for index, token in enumerate(relevant_tokens):
-                casing = Casing(token)
-                new_tokens.append(casing.convert(replacement_words[index]))
-            for replacement_word in replacement_words[len(relevant_tokens):]:
-                new_tokens.append(casing.convert(replacement_word))
-        tokens.set_tokens(start_number - 1, end_number, new_tokens)
+        replace_tokens_with_matching_casing(tokens, index_range, replacement)
         actions.user.correction_chicken_replace_text_with_tokens()
 
     def correction_chicken_remove_characters_from_word(word_number: int, characters: int):
