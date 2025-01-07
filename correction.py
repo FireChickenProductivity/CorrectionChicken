@@ -356,7 +356,7 @@ class Actions:
         word = tokens.get_token(word_number - 1)
         homophones = actions.user.correction_chicken_get_homophones(word)
         if homophones:
-            index = homophones.index(word)
+            index = homophones.index(word.lower())
             index = (index + 1) % len(homophones)
             actions.user.correction_chicken_replace_word_with_same_casing(word_number, homophones[index])
         
