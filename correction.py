@@ -90,21 +90,43 @@ def compute_casing_based_on_neighbors(last_casing, replacement_token, next_casin
         casing = next_casing
     return casing
 
-def replace_tokens_with_matching_casing(tokens: Tokens, index_range, replacement: str):
-    start_number, end_number = index_range
-    relevant_tokens = tokens.get_tokens(start_number - 1, end_number)
-    new_tokens = []
-    tokens_for_replacement = Tokens(replacement)
-    replacement_tokens = tokens_for_replacement.get_tokens(0, tokens_for_replacement.get_size())
-    if start_number == 1 and tokens.get_token(0).isalpha():
-        last_casing = Casing(tokens.get_token(0))
+def compute_first_alphabetic_index_and_casing(tokens: Tokens, start_index):
+    for i in range(start_index, tokens.get_size()):
+        if tokens.get_token(i).isalpha():
+            return i, Casing(tokens.get_token(i))
+    return None, None
+
+def compute_last_alphabetic_index_and_casing(tokens: Tokens, end_index):
+    for i in range(end_index, -1, -1):
+        if tokens.get_token(i).isalpha():
+            return i, Casing(tokens.get_token(i))
+    return None, None
+
+def compute_before_casing(tokens: Tokens, start_number):
+    if start_number > 1:
+        first_index, first_casing = compute_first_alphabetic_index_and_casing(tokens, start_number - 2)
+        if first_index is not None and first_index + 1 < start_number:
+            last_casing = first_casing
+        else:
+            last_casing = None
     else:
         last_casing = None
-    if end_number == tokens.get_size() and tokens.get_token(end_number - 1).isalpha():
-        after_casing = Casing(tokens.get_token(end_number - 1))
+    return last_casing
+
+def compute_after_casing(tokens: Tokens, end_number):
+    if end_number < tokens.get_size():
+        last_index, last_casing = compute_last_alphabetic_index_and_casing(tokens, end_number)
+        if last_index is not None and last_index + 1 > end_number:
+            after_casing = last_casing
+        else:
+            after_casing = None
     else:
         after_casing = None
+    return after_casing
+
+def create_tokens_with_matching_casing(replacement_tokens, relevant_tokens, last_casing, after_casing):
     next_index = 0
+    new_tokens = []
     for index, replacement_token in enumerate(replacement_tokens):
         if index < len(relevant_tokens) and relevant_tokens[index].isalpha():
             casing = Casing(relevant_tokens[index])
@@ -122,6 +144,16 @@ def replace_tokens_with_matching_casing(tokens: Tokens, index_range, replacement
         converted_token = casing.convert(replacement_token)
         new_tokens.append(converted_token)
         last_casing = casing
+    return new_tokens
+
+def replace_tokens_with_matching_casing(tokens: Tokens, index_range, replacement: str):
+    start_number, end_number = index_range
+    relevant_tokens = tokens.get_tokens(start_number - 1, end_number)
+    tokens_for_replacement = Tokens(replacement)
+    replacement_tokens = tokens_for_replacement.get_tokens(0, tokens_for_replacement.get_size())
+    last_casing = compute_before_casing(tokens, start_number)
+    after_casing = compute_after_casing(tokens, end_number)
+    new_tokens = create_tokens_with_matching_casing(replacement_tokens, relevant_tokens, last_casing, after_casing)
     tokens.set_tokens(start_number - 1, end_number, new_tokens)
 
 def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):

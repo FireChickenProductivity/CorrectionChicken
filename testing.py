@@ -27,5 +27,6 @@ if True:
         (Tokens("this, is"), (1, 3), "Words Are Irrelevant", Tokens("words are irrelevant")),
         (Tokens("This, Is"), (1, 3), "Words Are Irrelevant", Tokens("Words Are Irrelevant")),
         (Tokens("This, IS"), (2, 3), "Are Irrelevant", Tokens("This Are IRRELEVANT")),
+        (Tokens("IS, This"), (1, 2), "Are Irrelevant", Tokens("ARE Irrelevant This")),
     ]
     perform_single_output_table_testing(replacing_tokens_with_matching_casing_table, replace_tokens_with_matching_casing, in_place_index=0)
