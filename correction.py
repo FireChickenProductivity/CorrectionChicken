@@ -253,7 +253,7 @@ class Actions:
         global current_editing_word_number_range, replacement, tokens
         if current_editing_word_number_range is not None and replacement:
             if type(current_editing_word_number_range) == int:
-                original = tokens.get_token[current_editing_word_number_range - 1]
+                original = tokens.get_token(current_editing_word_number_range - 1)
             else:
                 original = " ".join(tokens.get_tokens(current_editing_word_number_range[0] - 1, current_editing_word_number_range[1]))
             actions.user.correction_chicken_add_correction_rule(original, replacement)
