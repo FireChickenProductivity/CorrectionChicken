@@ -1,5 +1,5 @@
-from talon import Module, actions, imgui
-from typing import List
+from talon import Module, actions, imgui, Context
+from typing import List, Union, Tuple
 
 last_phrase = ""
 phrase_numbering = ""
@@ -223,6 +223,10 @@ def apply_speakable_casing(spoken_form, target):
 
 module = Module()
 module.list("correction_chicken_casing", desc="Casing options")
+module.tag("correction_chicken_replacement", desc="Enables replacement commands for correction chicken")
+module.tag("correction_chicken", desc="Activates correction chicken commands")
+context = Context()
+replacement_context = Context()
 @module.action_class
 class Actions:
     def correction_chicken_update_last_phrase(phrase: str):
@@ -298,10 +302,12 @@ class Actions:
         actions.user.correction_chicken_replace_text_with_tokens()
 
     def correction_chicken_toggle():
-        """Toggles the correction chicken GUI"""
+        """Toggles correction chicken"""
         if gui.showing:
+            context.tags = []
             gui.hide()
         else:
+            context.tags = ["user.correction_chicken"]
             gui.show()
     
     def correction_chicken_remove_word(word_number: int):
@@ -310,11 +316,25 @@ class Actions:
         tokens.remove_token(word_number - 1)
         actions.user.correction_chicken_replace_text_with_tokens()
 
+    def correction_chicken_activate_replacement_context():
+        """Activates the replacement context"""
+        replacement_context.tags = ["user.correction_chicken_replacement"]
+
+    def correction_chicken_deactivate_replacement_context():
+        """Deactivates the replacement context"""
+        replacement_context.tags = []
+
+    def correction_chicken_set_current_number_range(range: Union[int, Tuple[int, int]]):
+        """Set the current number range"""
+        global current_editing_word_number_range
+        current_editing_word_number_range = range
+        actions.user.correction_chicken_activate_replacement_context()
+
     def correction_chicken_spell_out_alternative_for_word(characters: List[str], word_number: int=None):
         """Spell out the alternative for the specified word"""
         global current_editing_word_number_range, replacement
         if word_number is not None:
-            current_editing_word_number_range = word_number
+            actions.user.correction_chicken_set_current_number_range(word_number)
         replacement = "".join(characters)
     
     def correction_chicken_set_replacement(new_replacement: str):
@@ -325,12 +345,12 @@ class Actions:
     def correction_chicken_choose_word_for_replacement(word_number: int):
         """Update the current word for replacement"""
         global current_editing_word_number_range
-        current_editing_word_number_range = word_number
+        actions.user.correction_chicken_set_current_number_range(word_number)
 
     def fire_chicken_choosing_range_for_replacement(start_word_number: int, end_word_number: int):
         """Choose the range of words for replacement"""
         global current_editing_word_number_range
-        current_editing_word_number_range = (start_word_number, end_word_number)
+        actions.user.correction_chicken_set_current_number_range((start_word_number, end_word_number))
 
     def correction_chicken_make_replacement():
         """Make the replacement for the current word"""
@@ -342,6 +362,7 @@ class Actions:
                 actions.user.correction_chicken_replace_words_with_same_casing(current_editing_word_number_range, replacement)
             current_editing_word_number_range = None
             replacement = ""
+            actions.user.correction_chicken_deactivate_replacement_context()
 
     def correction_chickens_save_replacement_as_correction_rule():
         """Saves the current replacement as a correction rule"""
