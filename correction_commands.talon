@@ -58,12 +58,6 @@ phrasing <user.prose>:
 wording <user.word>:
     user.correction_chicken_set_replacement(word)
 
-(place|replace|replacement) accept|replace: user.correction_chicken_make_replacement()
-
-(place|replace|replacement) save: 
-    user.correction_chickens_save_replacement_as_correction_rule()
-    user.correction_chicken_make_replacement()
-
 correct that:
     user.correction_chicken_set_last_phrase_to_selected_text()
 
