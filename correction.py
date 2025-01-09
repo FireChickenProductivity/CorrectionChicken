@@ -17,23 +17,31 @@ def is_token_over(token, next_character):
     return last_character.isalpha() != next_character.isalpha() or next_character.isspace()
 
 class Tokens:
-    def _add_token(self, token):
-        self.tokens.append(token)
-        if token[-1].isalpha():
+    def _add_token(self):
+        self.tokens.append(self.token)
+        if len(self.tokens) > 1:
+            self.spacing.append(self.spaces)
+        if self.token[-1].isalpha():
             self.word_indexes.append(len(self.tokens) - 1)
+        self.spaces = ""
+        self.token = ""
 
     def __init__(self, text):
         self.tokens = []
+        self.spacing = []
         self.word_indexes = []
-        token = ""
+        self.spaces = ""
+        self.token = ""
         for character in text:
-            if is_token_over(token, character):
-                self._add_token(token)
-                token = ""
-            if not character.isspace():
-                token += character
-        if token:
-            self._add_token(token)
+            if is_token_over(self.token, character):
+                self._add_token()
+            if character.isspace():
+                self.spaces += character
+            else:
+                self.token += character
+        if self.token:
+            self._add_token()
+        self.spacing.append(self.spaces)
 
     def get_token(self, index):
         return self.tokens[index]
@@ -72,7 +80,10 @@ class Tokens:
         return self.__str__()
     
     def __str__(self):
-        return " ".join(self.tokens)
+        result = ""
+        for i in range(len(self.tokens)):
+            result += self.tokens[i] + self.spacing[i]
+        return result
 
     def __eq__(self, value: object) -> bool:
         return self.tokens == value.tokens
