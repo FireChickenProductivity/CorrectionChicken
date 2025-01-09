@@ -1,5 +1,5 @@
 tag: user.correction_chicken_replacement
-tag: user.correction_chicken
+and tag: user.correction_chicken
 mode: command
 mode: dictation
 -
