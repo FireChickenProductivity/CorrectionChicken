@@ -14,7 +14,7 @@ def is_token_over(token, next_character):
     if not token:
         return False
     last_character = token[-1]
-    return last_character.isalpha() != next_character.isalpha() or next_character.isspace()
+    return last_character.isalpha() != next_character.isalpha() or next_character.isspace() or (last_character.islower and next_character.isupper())
 
 class Tokens:
     def _add_token(self):
