@@ -70,3 +70,9 @@ correct that:
 correct line:
     edit.select_line()
     user.correction_chicken_set_last_phrase_to_selected_text()
+
+case {user.correction_chicken_casing} <number_small>:
+    user.correction_chicken_re_case_word(number_small, correction_chicken_casing)
+
+case {user.correction_chicken_casing} <number_small> through <number_small>:
+    user.correction_chicken_re_case_words(number_small_1, number_small_2, correction_chicken_casing)

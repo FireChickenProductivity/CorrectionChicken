@@ -79,7 +79,7 @@ class Tokens:
 
 def compute_casing_based_on_neighbors(last_casing, replacement_token, next_casing):
     if not last_casing and not next_casing:
-        casing = Casing(replacement_token)
+        casing = Casing.from_word(replacement_token)
     elif not next_casing:
         casing = last_casing
     elif (not last_casing) or last_casing == next_casing:
@@ -93,13 +93,13 @@ def compute_casing_based_on_neighbors(last_casing, replacement_token, next_casin
 def compute_first_alphabetic_index_and_casing(tokens: Tokens, start_index):
     for i in range(start_index, tokens.get_size()):
         if tokens.get_token(i).isalpha():
-            return i, Casing(tokens.get_token(i))
+            return i, Casing.from_word(tokens.get_token(i))
     return None, None
 
 def compute_last_alphabetic_index_and_casing(tokens: Tokens, end_index):
     for i in range(end_index, -1, -1):
         if tokens.get_token(i).isalpha():
-            return i, Casing(tokens.get_token(i))
+            return i, Casing.from_word(tokens.get_token(i))
     return None, None
 
 def compute_before_casing(tokens: Tokens, start_number):
@@ -129,13 +129,13 @@ def create_tokens_with_matching_casing(replacement_tokens, relevant_tokens, last
     new_tokens = []
     for index, replacement_token in enumerate(replacement_tokens):
         if index < len(relevant_tokens) and relevant_tokens[index].isalpha():
-            casing = Casing(relevant_tokens[index])
+            casing = Casing.from_word(relevant_tokens[index])
         else:
             if next_index <= index:
                 while (next_index < len(relevant_tokens) and not relevant_tokens[next_index].isalpha()) or next_index <= index:
                     next_index += 1
                 if next_index < len(relevant_tokens):
-                    next_casing = Casing(relevant_tokens[next_index])
+                    next_casing = Casing.from_word(relevant_tokens[next_index])
             if next_index >= len(relevant_tokens):
                 next_casing = after_casing
             casing = compute_casing_based_on_neighbors(last_casing, replacement_token, next_casing)
@@ -165,20 +165,24 @@ class Casing:
     CAPITALIZED = 2
     UPPERCASE = 3
     OTHER = 4
-    def __init__(self, word: str):
-        self.word = word
+    def __init__(self, casing: int):
+        self.casing = casing
+
+    @staticmethod
+    def from_word(word: str):
         if word.islower():
-            self.casing = Casing.LOWERCASE
+            case = Casing.LOWERCASE
         elif word.isupper():
             if len(word) == 1:
-                self.casing = Casing.CAPITALIZED
+                case = Casing.CAPITALIZED
             else:
-                self.casing = Casing.UPPERCASE
+                case = Casing.UPPERCASE
         elif word[0].isupper():
-            self.casing = Casing.CAPITALIZED
+            case = Casing.CAPITALIZED
         else:
-            self.casing = Casing.OTHER
-    
+            case = Casing.OTHER
+        return Casing(case)
+
     def convert(self, word: str):
         if self.casing == Casing.UPPERCASE:
             return word.upper()
@@ -195,7 +199,19 @@ class Casing:
     def __lt__(self, value: object) -> bool:
         return self.casing < value.casing
 
+SPEAKABLE_CASINGS = {
+    "LOWER": Casing.LOWERCASE,
+    "CAPITALIZED": Casing.CAPITALIZED,
+    "UPPER": Casing.UPPERCASE,
+}
+
+def apply_speakable_casing(spoken_form, target):
+    case = SPEAKABLE_CASINGS[spoken_form]
+    casing = Casing(case)
+    return casing.convert(target)
+
 module = Module()
+module.list("correction_chicken_casing", desc="Casing options")
 @module.action_class
 class Actions:
     def correction_chicken_update_last_phrase(phrase: str):
@@ -244,7 +260,7 @@ class Actions:
         """Replace the specified word with the specified replacement using the same casing"""
         global tokens
         word = tokens.get_token(index - 1)
-        casing = Casing(word)
+        casing = Casing.from_word(word)
         tokens.set_token(index - 1, casing.convert(replacement))
         actions.user.correction_chicken_replace_text_with_tokens()
 
@@ -425,12 +441,25 @@ class Actions:
         post_index = index + len(correction.original)
         if not correction.casing_override:
             original_text_getting_replaced = last_phrase[index:post_index]
-            casing = Casing(original_text_getting_replaced)
+            casing = Casing.from_word(original_text_getting_replaced)
             replacement = casing.convert(replacement)
         new_text = last_phrase[:index] + replacement
         if post_index < len(last_phrase):
             new_text += last_phrase[index + len(correction.original):]
         actions.user.correction_chicken_replace_text(new_text)
+    
+    def correction_chicken_re_case_words(start_number: int, end_number: int, casing: str):
+        """Change the casing of the specified words"""
+        global tokens
+        for i in range(start_number - 1, end_number):
+            word = tokens.get_token(i)
+            converted_word = apply_speakable_casing(casing, word)
+            tokens.set_token(i, converted_word)
+        actions.user.correction_chicken_replace_text_with_tokens()
+
+    def correction_chicken_re_case_word(word_number: int, casing: str):
+        """Change the casing of the specified word"""
+        actions.user.correction_chicken_re_case_words(word_number, word_number, casing)
     
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):

@@ -1,0 +1,6 @@
+list: user.correction_chicken_casing
+-
+lower: LOWER
+cap: CAPITALIZED
+capital: CAPITALIZED
+upper: UPPER
