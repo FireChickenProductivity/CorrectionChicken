@@ -1,3 +1,4 @@
+tag: user.correction_chicken
 mode: command
 mode: dictation
 -
@@ -12,9 +13,6 @@ plural <number_small>:
 
 dual <number_small>:
     user.correction_chicken_add_characters_to_word_ending(number_small, "es")
-
-correction chicken:
-    user.correction_chicken_toggle()
 
 remove <number_small>:
     user.correction_chicken_remove_word(number_small)

@@ -224,7 +224,9 @@ def apply_speakable_casing(spoken_form, target):
 module = Module()
 module.list("correction_chicken_casing", desc="Casing options")
 module.tag("correction_chicken_replacement", desc="Enables replacement commands for correction chicken")
+module.tag("correction_chicken", desc="Activates correction chicken commands")
 context = Context()
+replacement_context = Context()
 @module.action_class
 class Actions:
     def correction_chicken_update_last_phrase(phrase: str):
@@ -300,10 +302,12 @@ class Actions:
         actions.user.correction_chicken_replace_text_with_tokens()
 
     def correction_chicken_toggle():
-        """Toggles the correction chicken GUI"""
+        """Toggles correction chicken"""
         if gui.showing:
+            context.tags = []
             gui.hide()
         else:
+            context.tags = ["user.correction_chicken"]
             gui.show()
     
     def correction_chicken_remove_word(word_number: int):
@@ -314,11 +318,11 @@ class Actions:
 
     def correction_chicken_activate_replacement_context():
         """Activates the replacement context"""
-        context.tags = ["user.correction_chicken_replacement"]
+        replacement_context.tags = ["user.correction_chicken_replacement"]
 
     def correction_chicken_deactivate_replacement_context():
         """Deactivates the replacement context"""
-        context.tags = []
+        replacement_context.tags = []
 
     def correction_chicken_set_current_number_range(range: Union[int, Tuple[int, int]]):
         """Set the current number range"""
