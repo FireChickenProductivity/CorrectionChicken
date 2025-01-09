@@ -448,13 +448,18 @@ class Actions:
             new_text += last_phrase[index + len(correction.original):]
         actions.user.correction_chicken_replace_text(new_text)
     
+    def correction_chicken_re_case_words(start_number: int, end_number: int, casing: str):
+        """Change the casing of the specified words"""
+        global tokens
+        for i in range(start_number - 1, end_number):
+            word = tokens.get_token(i)
+            converted_word = apply_speakable_casing(casing, word)
+            tokens.set_token(i, converted_word)
+        actions.user.correction_chicken_replace_text_with_tokens()
+
     def correction_chicken_re_case_word(word_number: int, casing: str):
         """Change the casing of the specified word"""
-        global tokens
-        word = tokens.get_token(word_number - 1)
-        casing = apply_speakable_casing(casing, word)
-        tokens.set_token(word_number - 1, casing)
-        actions.user.correction_chicken_replace_text_with_tokens()
+        actions.user.correction_chicken_re_case_words(word_number, word_number, casing)
     
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):
