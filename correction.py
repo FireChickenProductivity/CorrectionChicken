@@ -262,7 +262,12 @@ class Actions:
     def correction_chicken_replace_text(replacement: str):
         """Replace the phrase with the specified text"""
         global last_phrase
-        for _ in range(len(last_phrase)):
+
+        number_of_leading_spaces = 0
+        while number_of_leading_spaces < len(last_phrase) and last_phrase[number_of_leading_spaces].isspace():
+            number_of_leading_spaces += 1
+
+        for _ in range(len(last_phrase) - number_of_leading_spaces):
             actions.edit.delete()
         actions.insert(replacement)
         actions.user.correction_chicken_update_last_phrase(replacement)
