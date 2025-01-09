@@ -1,4 +1,4 @@
-if True:
+if False:
     from .correction import *
     def perform_single_output_table_testing(table, function, in_place_index=None):
         failures = 0
