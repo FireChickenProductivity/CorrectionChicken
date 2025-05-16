@@ -1,6 +1,8 @@
 from talon import Module, actions, imgui, Context
 from typing import List, Union, Tuple
 
+MINIMUM_CORRECTION_LINE_LENGTH = 20
+
 last_phrase = ""
 phrase_numbering = ""
 tokens = None
@@ -497,14 +499,31 @@ class Actions:
     def correction_chicken_re_case_word(word_number: int, casing: str):
         """Change the casing of the specified word"""
         actions.user.correction_chicken_re_case_words(word_number, word_number, casing)
-    
+
+def compute_correction_text_with_numbering(index, text):
+    return f"{index + 1}. {text}"
+
+def show_correction_options(phrase_numbering, correction_texts):
+    correction_line = ""
+    for index, correction_text in enumerate(correction_texts):
+        option_text = compute_correction_text_with_numbering(index, correction_text)
+        if correction_line and len(correction_line) + len(option_text) + 1 < max(len(phrase_numbering), MINIMUM_CORRECTION_LINE_LENGTH):
+            correction_line += " " + option_text
+        else:
+            if correction_line:
+                gui.text(correction_line)
+                correction_line = ""
+            correction_line = option_text
+    if correction_line:
+        gui.text(correction_line)
+
 @imgui.open(y=0)
 def gui(gui: imgui.GUI):
     global last_phrase, phrase_numbering, replacement, current_editing_word_number_range, tokens
     gui.text(phrase_numbering)
     gui.line()
-    for index, correction_text in enumerate(correction_texts):
-        gui.text(f"{index + 1}. {correction_text}")
+
+    show_correction_options(phrase_numbering, correction_texts)
     if replacement:
         gui.line()
         gui.text(replacement)
