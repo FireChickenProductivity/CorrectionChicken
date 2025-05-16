@@ -173,6 +173,12 @@ def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):
             return i
     return 0
 
+def compute_number_of_leading_spaces(text: str) -> int:
+    number_of_leading_spaces = 0
+    while number_of_leading_spaces < len(text) and text[number_of_leading_spaces].isspace():
+        number_of_leading_spaces += 1
+    return number_of_leading_spaces
+
 class Casing:
     LOWERCASE = 1
     CAPITALIZED = 2
@@ -265,13 +271,17 @@ class Actions:
         """Replace the phrase with the specified text"""
         global last_phrase
 
-        number_of_leading_spaces = 0
-        while number_of_leading_spaces < len(last_phrase) and last_phrase[number_of_leading_spaces].isspace():
-            number_of_leading_spaces += 1
+        number_of_leading_spaces = compute_number_of_leading_spaces(last_phrase)
 
         for _ in range(len(last_phrase) - number_of_leading_spaces):
             actions.edit.delete()
-        actions.insert(replacement)
+        
+        replacement_number_of_leading_spaces = compute_number_of_leading_spaces(replacement)
+        if replacement_number_of_leading_spaces >= number_of_leading_spaces:
+            trimmed_replacement = replacement[number_of_leading_spaces:]
+            actions.insert(trimmed_replacement)
+        else:
+            actions.insert(replacement)
         actions.user.correction_chicken_update_last_phrase(replacement)
 
     def correction_chicken_replace_text_with_tokens():
