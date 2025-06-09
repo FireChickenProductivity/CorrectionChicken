@@ -179,6 +179,21 @@ def compute_number_of_leading_spaces(text: str) -> int:
         number_of_leading_spaces += 1
     return number_of_leading_spaces
 
+def compute_common_prefix_size(a: str, b: str) -> int:
+    size = 0
+    minimum_length = min(len(a), len(b))
+    while size < minimum_length and a[size] == b[size]:
+        size += 1
+    return size
+
+def replace_text_through_deletion_and_insertion(original: str, replacement: str):
+    common_prefix_size = compute_common_prefix_size(original, replacement)
+    for _ in range(len(original) - common_prefix_size):
+        actions.edit.delete()
+    actions.sleep(0.1)
+    trimmed_replacement = replacement[common_prefix_size:]
+    actions.insert(trimmed_replacement)
+
 class Casing:
     LOWERCASE = 1
     CAPITALIZED = 2
@@ -240,6 +255,7 @@ class Actions:
     def correction_chicken_update_last_phrase(phrase: str):
         """Update the last phrase dictated"""
         global last_phrase, phrase_numbering, corrections, correction_texts, tokens
+        phrase = phrase.lstrip()
         if phrase != last_phrase:
             actions.user.correction_chicken_set_last_phrase(phrase)
             tokens = Tokens(phrase)
@@ -270,18 +286,7 @@ class Actions:
     def correction_chicken_replace_text(replacement: str):
         """Replace the phrase with the specified text"""
         global last_phrase
-
-        number_of_leading_spaces = compute_number_of_leading_spaces(last_phrase)
-
-        for _ in range(len(last_phrase) - number_of_leading_spaces):
-            actions.edit.delete()
-        
-        replacement_number_of_leading_spaces = compute_number_of_leading_spaces(replacement)
-        if replacement_number_of_leading_spaces >= number_of_leading_spaces:
-            trimmed_replacement = replacement[number_of_leading_spaces:]
-            actions.insert(trimmed_replacement)
-        else:
-            actions.insert(replacement)
+        replace_text_through_deletion_and_insertion(last_phrase, replacement)
         actions.user.correction_chicken_update_last_phrase(replacement)
 
     def correction_chicken_replace_text_with_tokens():
