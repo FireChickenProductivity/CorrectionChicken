@@ -265,14 +265,15 @@ module.setting(
     desc = "How long to keep the correction chicken graphics open without a correction chicken command getting used in seconds"
 )
 graphics_timeout_job = None
-def hide_graphics():
-    gui.hide()
-    print('hiding')
-def restart_graphics_timeout_job():
+is_active: bool = False
+
+def have_graphics_handle_activity():
     global graphics_timeout_job
     if graphics_timeout_job:
         cron.cancel(graphics_timeout_job)
-    graphics_timeout_job = cron.after(f"{settings.get("user.correction_chicken_graphics_time_out")}s", hide_graphics)
+    if is_active and not gui.showing:
+        gui.show()
+    graphics_timeout_job = cron.after(f"{settings.get("user.correction_chicken_graphics_time_out")}s", gui.hide)
 
 def cancel_graphics_timeout_job():
     global graphics_timeout_job
@@ -287,6 +288,7 @@ class Actions:
         global last_phrase, phrase_numbering, corrections, correction_texts, tokens
         phrase = phrase.lstrip()
         if phrase != last_phrase:
+            have_graphics_handle_activity()
             actions.user.correction_chicken_set_last_phrase(phrase)
             tokens = Tokens(phrase)
             last_phrase = phrase
@@ -355,13 +357,16 @@ class Actions:
 
     def correction_chicken_toggle():
         """Toggles correction chicken"""
-        if gui.showing:
+        global is_active
+        if is_active:
             context.tags = []
             gui.hide()
             cancel_graphics_timeout_job()
         else:
             context.tags = ["user.correction_chicken"]
-            restart_graphics_timeout_job()
+            gui.show()
+            have_graphics_handle_activity()
+        is_active = not is_active
     
     def correction_chicken_remove_word(word_number: int):
         """Remove the specified word"""
@@ -379,6 +384,7 @@ class Actions:
 
     def correction_chicken_set_current_number_range(range: Union[int, Tuple[int, int]]):
         """Set the current number range"""
+        have_graphics_handle_activity()
         global current_editing_word_number_range
         current_editing_word_number_range = range
         actions.user.correction_chicken_activate_replacement_context()
@@ -392,6 +398,7 @@ class Actions:
     
     def correction_chicken_set_replacement(new_replacement: str):
         """Set the replacement"""
+        have_graphics_handle_activity()
         global replacement
         replacement = new_replacement
 
