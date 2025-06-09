@@ -1,4 +1,4 @@
-from talon import Module, actions, imgui, Context
+from talon import Module, actions, imgui, Context, cron, settings
 from typing import List, Union, Tuple
 
 MINIMUM_CORRECTION_LINE_LENGTH = 20
@@ -257,6 +257,29 @@ module.tag("correction_chicken_replacement", desc="Enables replacement commands 
 module.tag("correction_chicken", desc="Activates correction chicken commands")
 context = Context()
 replacement_context = Context()
+
+module.setting(
+    'correction_chicken_graphics_time_out',
+    type = float,
+    default = 60,
+    desc = "How long to keep the correction chicken graphics open without a correction chicken command getting used in seconds"
+)
+graphics_timeout_job = None
+def hide_graphics():
+    gui.hide()
+    print('hiding')
+def restart_graphics_timeout_job():
+    global graphics_timeout_job
+    if graphics_timeout_job:
+        cron.cancel(graphics_timeout_job)
+    graphics_timeout_job = cron.after(f"{settings.get("user.correction_chicken_graphics_time_out")}s", hide_graphics)
+
+def cancel_graphics_timeout_job():
+    global graphics_timeout_job
+    if graphics_timeout_job:
+        cron.cancel(graphics_timeout_job)
+        graphics_timeout_job = None
+
 @module.action_class
 class Actions:
     def correction_chicken_update_last_phrase(phrase: str):
@@ -335,9 +358,10 @@ class Actions:
         if gui.showing:
             context.tags = []
             gui.hide()
+            cancel_graphics_timeout_job()
         else:
             context.tags = ["user.correction_chicken"]
-            gui.show()
+            restart_graphics_timeout_job()
     
     def correction_chicken_remove_word(word_number: int):
         """Remove the specified word"""
