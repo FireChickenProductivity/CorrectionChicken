@@ -15,9 +15,10 @@ def is_token_over(token, next_character, next_next_character):
     if not token:
         return False
     last_character = token[-1]
+    # If the next or last character is a single quote, make sure that contractions and possessive forms are not token endings
     if next_character == "'" and (next_next_character and (next_next_character.isalpha() or next_next_character.isspace()) and last_character.isalpha()):
         return False
-    elif last_character == "'" and (len(token) > 1 and token[-2].isalpha() and next_character.isalpha()):
+    elif last_character == "'" and (len(token) > 1 and token[-2].isalpha() and (next_character.isalpha()) or next_character.isspace()):
         return False
     return last_character.isalpha() != next_character.isalpha() or \
             next_character.isspace() or \

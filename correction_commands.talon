@@ -68,3 +68,5 @@ case {user.correction_chicken_casing} <number_small>:
 
 case {user.correction_chicken_casing} <number_small> through <number_small>:
     user.correction_chicken_re_case_words(number_small_1, number_small_2, correction_chicken_casing)
+
+experiment: user.dictation_insert("schools' pizza")
