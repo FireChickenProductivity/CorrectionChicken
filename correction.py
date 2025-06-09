@@ -11,13 +11,15 @@ correction_texts = []
 replacement = ""
 current_editing_word_number_range = None
 
-def is_token_over(token, next_character):
-    """A new token is encountered if transitioning from alphabetic to non alphabetic or from non alphabetic to alphabetic as well as when encountering a space"""
+def is_token_over(token, next_character, next_next_character):
     if not token:
         return False
     last_character = token[-1]
-    return last_character.isalpha() != next_character.isalpha() and \
-                (not last_character == "'" and not next_character == "'") or \
+    if next_character == "'" and (next_next_character and (next_next_character.isalpha() or next_next_character.isspace()) and last_character.isalpha()):
+        return False
+    elif last_character == "'" and (len(token) > 1 and token[-2].isalpha() and next_character.isalpha()):
+        return False
+    return last_character.isalpha() != next_character.isalpha() or \
             next_character.isspace() or \
             (last_character.islower() and next_character.isupper())
 
@@ -37,8 +39,9 @@ class Tokens:
         self.word_indexes = []
         self.spaces = ""
         self.token = ""
-        for character in text:
-            if is_token_over(self.token, character):
+        for index, character in enumerate(text):
+            next_next_character = text[index + 1] if index + 1 < len(text) else None
+            if is_token_over(self.token, character, next_next_character):
                 self._add_token()
             if character.isspace():
                 self.spaces += character
