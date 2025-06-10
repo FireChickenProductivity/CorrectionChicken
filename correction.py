@@ -273,7 +273,9 @@ def have_graphics_handle_activity():
         cron.cancel(graphics_timeout_job)
     if is_active and not gui.showing:
         gui.show()
-    graphics_timeout_job = cron.after(f"{settings.get("user.correction_chicken_graphics_time_out")}s", gui.hide)
+    time_out_amount = settings.get("user.correction_chicken_graphics_time_out")
+    if time_out_amount > 0:
+        graphics_timeout_job = cron.after(f"{time_out_amount}s", gui.hide)
 
 def cancel_graphics_timeout_job():
     global graphics_timeout_job
