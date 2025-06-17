@@ -1,5 +1,5 @@
 from talon import Module, actions, imgui, Context, cron, settings
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Optional
 
 MINIMUM_CORRECTION_LINE_LENGTH = 20
 
@@ -35,6 +35,7 @@ class Tokens:
         self.token = ""
 
     def __init__(self, text):
+        text = text.lstrip()
         self.tokens = []
         self.spacing = []
         self.word_indexes = []
@@ -85,6 +86,21 @@ class Tokens:
     def remove_token(self, index):
         self.tokens.pop(index)
 
+    def remove_separator(self, index: int):
+        if index in self.word_indexes:
+            next_word_index: Optional[int] = None
+            for i in self.word_indexes:
+                if i > index:
+                    next_word_index = i
+                    break
+            if next_word_index is not None:
+                self.spacing.pop(index)
+                next_word = self.tokens.pop(next_word_index)
+                self.tokens[index] += next_word
+                if next_word_index > index + 1:
+                    self.tokens.pop(index + 1) 
+                    #Remove the spacing for the removed separator
+                    self.spacing.pop(index)
     def __repr__(self):
         return self.__str__()
     
@@ -374,6 +390,12 @@ class Actions:
         """Remove the specified word"""
         global tokens
         tokens.remove_token(word_number - 1)
+        actions.user.correction_chicken_replace_text_with_tokens()
+
+    def correction_chicken_remove_separator(word_number: int):
+        """Removes the separator after the specified word"""
+        global tokens
+        tokens.remove_separator(word_number - 1)
         actions.user.correction_chicken_replace_text_with_tokens()
 
     def correction_chicken_activate_replacement_context():
