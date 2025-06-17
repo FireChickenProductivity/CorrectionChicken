@@ -94,13 +94,17 @@ class Tokens:
                     next_word_index = i
                     break
             if next_word_index is not None:
-                self.spacing.pop(index)
-                next_word = self.tokens.pop(next_word_index)
-                self.tokens[index] += next_word
-                if next_word_index > index + 1:
-                    self.tokens.pop(index + 1) 
-                    #Remove the spacing for the removed separator
+                spacing = self.spacing[index]
+                if spacing or next_word_index > index + 1:
+                    # If The words are next to each other with no spacing between them, there is nothing to remove
                     self.spacing.pop(index)
+                    next_word = self.tokens.pop(next_word_index)
+                    self.tokens[index] += next_word
+                    if next_word_index > index + 1:
+                        self.tokens.pop(index + 1) 
+                        #Remove the spacing for the removed separator
+                        self.spacing.pop(index)
+                        
     def __repr__(self):
         return self.__str__()
     
