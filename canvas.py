@@ -1,14 +1,26 @@
-#Goals
-#custom scaling size
-#ability to move location through voice commands
-#ability to save location
-#Size based on input text
-#Ability to set background color
-#Ability to set text color
-#ability to set text and add vertical bars
-
-from talon import canvas, ui, skia
+from talon import canvas, ui, skia, Module, settings, actions
 from talon.skia import Paint, Rect
+
+module = Module()
+
+module.setting(
+	'correction_chicken_display_scale',
+	type = float,
+	default = 1.0,
+	desc = 'The scale for the correction chicken display. Increase this to make it bigger and decrease it to make it smaller.',
+)
+module.setting(
+	'correction_chicken_background_color',
+	type = str,
+	default = "#FFFFFF",  # Default to white
+	desc = 'This is the correction chicken display background color.'
+)
+module.setting(
+	'correction_chicken_foreground_color',
+	type = str,
+	default = "#000000",  # Default to black
+	desc = 'This is the correction chicken display foreground color.'
+)
 
 class VerticalBar: pass
 
@@ -27,13 +39,11 @@ class Items:
 
 class Display:
 	def __init__(self):
-		self.scaling_factor = 1.0
 		self.canvas = None
 		self.left = 0
 		self.top = 0
 		self.items: Items = Items()
-		self.background_color = "#FFFFFF"  # White
-		self.foreground_color = "#000000"  # Black
+		self.showing = False
 
 	def update(self, items: Items):
 		self.items = items
@@ -47,10 +57,10 @@ class Display:
 
 	def draw(self, canvas):
 		canvas.paint.text_align = canvas.paint.TextAlign.LEFT
-		text_size = 10 * self.scaling_factor
+		text_size = 10 * settings.get('user.correction_chicken_display_scale')
 		canvas.paint.textsize = text_size
 		canvas.paint.style = Paint.Style.FILL
-		canvas.paint.color = self.background_color
+		canvas.paint.color = settings.get('user.correction_chicken_background_color')
 		height = 0
 		width = 0
 		for item in self.items.get_items():
@@ -65,7 +75,7 @@ class Display:
 		rounded_rectangle = skia.RoundRect.from_rect(backround_rectangle, x=10, y=10)
 
 		canvas.draw_rrect(rounded_rectangle)
-		canvas.paint.color = self.foreground_color
+		canvas.paint.color = settings.get('user.correction_chicken_foreground_color')
 		y = self.top + 0.5*text_size
 		for i, item in enumerate(self.items.get_items()):
 			if isinstance(item, str):
@@ -92,16 +102,4 @@ class Display:
 	def set_position(self, left: int, top: int):
 		self.left = left
 		self.top = top
-		self.refresh()
-
-	def set_scaling_factor(self, scaling_factor):
-		self.scaling_factor = scaling_factor
-		self.refresh()
-
-	def set_foreground_color(self, color: str):
-		self.foreground_color = color
-		self.refresh()
-
-	def set_background_color(self, color: str):
-		self.background_color = color
 		self.refresh()

@@ -1,4 +1,4 @@
-from talon import Module, actions, imgui, Context, cron, settings
+from talon import Module, actions, Context, cron, settings, app
 from typing import List, Union, Tuple, Optional
 from .canvas import Display, Items
 
@@ -12,6 +12,11 @@ correction_texts = []
 replacement = ""
 current_editing_word_number_range = None
 display = Display()
+
+def on_ready():
+    top, right = actions.user.correction_chicken_load_display_position()
+    display.set_position(top, right)
+app.register("ready", on_ready)
 
 def is_token_over(token, next_character, next_next_character):
     if not token:
@@ -592,6 +597,7 @@ class Actions:
         x = int(actions.mouse_x())
         y = int(actions.mouse_y())
         display.set_position(x, y)
+        actions.user.correction_chicken_save_display_position(x, y)
         have_graphics_handle_activity()
         update_display()
 
