@@ -1,5 +1,6 @@
 from talon import Module, actions, imgui, Context, cron, settings
 from typing import List, Union, Tuple, Optional
+from .canvas import Display, Items
 
 MINIMUM_CORRECTION_LINE_LENGTH = 20
 
@@ -10,6 +11,7 @@ corrections = []
 correction_texts = []
 replacement = ""
 current_editing_word_number_range = None
+display = Display()
 
 def is_token_over(token, next_character, next_next_character):
     if not token:
@@ -291,11 +293,11 @@ def have_graphics_handle_activity():
     global graphics_timeout_job
     if graphics_timeout_job:
         cron.cancel(graphics_timeout_job)
-    if is_active and not gui.showing:
-        gui.show()
+    if is_active and not display.is_showing():
+        display.show()
     time_out_amount = settings.get("user.correction_chicken_graphics_time_out")
     if time_out_amount > 0:
-        graphics_timeout_job = cron.after(f"{time_out_amount}s", gui.hide)
+        graphics_timeout_job = cron.after(f"{time_out_amount}s", display.hide)
 
 def cancel_graphics_timeout_job():
     global graphics_timeout_job
@@ -330,6 +332,7 @@ class Actions:
                 
             corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase)
             correction_texts = [correction.original + " -> " + correction.replacement for correction in corrections]
+            update_display()
 
     def correction_chicken_set_last_phrase_to_selected_text():
         """Set the last phrase to the selected text"""
@@ -382,11 +385,11 @@ class Actions:
         global is_active
         if is_active:
             context.tags = []
-            gui.hide()
+            display.hide()
             cancel_graphics_timeout_job()
         else:
             context.tags = ["user.correction_chicken"]
-            gui.show()
+            display.show()
             have_graphics_handle_activity()
         is_active = not is_active
     
@@ -416,6 +419,7 @@ class Actions:
         global current_editing_word_number_range
         current_editing_word_number_range = range
         actions.user.correction_chicken_activate_replacement_context()
+        update_display()
 
     def correction_chicken_spell_out_alternative_for_word(characters: List[str], word_number: int=None):
         """Spell out the alternative for the specified word"""
@@ -429,6 +433,7 @@ class Actions:
         have_graphics_handle_activity()
         global replacement
         replacement = new_replacement
+        update_display()
 
     def correction_chicken_choose_word_for_replacement(word_number: int):
         """Update the current word for replacement"""
@@ -580,11 +585,20 @@ class Actions:
     def correction_chicken_re_case_word(word_number: int, casing: str):
         """Change the casing of the specified word"""
         actions.user.correction_chicken_re_case_words(word_number, word_number, casing)
+    
+    def correction_chicken_set_display_position_to_current_mouse_position():
+        """Set the display position to the current mouse position"""
+        global display
+        x = actions.mouse_x()
+        y = actions.mouse_y()
+        display.set_position(x, y)
+        have_graphics_handle_activity()
+        update_display()
 
 def compute_correction_text_with_numbering(index, text):
     return f"{index + 1}. {text}"
 
-def show_correction_options(phrase_numbering, correction_texts):
+def show_correction_options(phrase_numbering, correction_texts, items: Items):
     correction_line = ""
     for index, correction_text in enumerate(correction_texts):
         option_text = compute_correction_text_with_numbering(index, correction_text)
@@ -592,22 +606,24 @@ def show_correction_options(phrase_numbering, correction_texts):
             correction_line += " " + option_text
         else:
             if correction_line:
-                gui.text(correction_line)
+                items.text(correction_line)
                 correction_line = ""
             correction_line = option_text
     if correction_line:
-        gui.text(correction_line)
+        items.text(correction_line)
 
-@imgui.open(y=0)
-def gui(gui: imgui.GUI):
+def update_display():
     global last_phrase, phrase_numbering, replacement, current_editing_word_number_range, tokens
-    gui.text(phrase_numbering)
-    gui.line()
+    print(last_phrase)
+    items = Items()
+    items.text(phrase_numbering)
+    items.line()
 
-    show_correction_options(phrase_numbering, correction_texts)
+    show_correction_options(phrase_numbering, correction_texts, items)
     if replacement:
-        gui.line()
-        gui.text(replacement)
+        items.line()
+        items.text(replacement)
     if current_editing_word_number_range:
-        gui.line()
-        gui.text(current_editing_word_number_range)
+        items.line()
+        items.text(current_editing_word_number_range)
+    display.update(items)
