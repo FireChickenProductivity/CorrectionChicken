@@ -614,7 +614,6 @@ def show_correction_options(phrase_numbering, correction_texts, items: Items):
 
 def update_display():
     global last_phrase, phrase_numbering, replacement, current_editing_word_number_range, tokens
-    print(last_phrase)
     items = Items()
     items.text(phrase_numbering)
     items.line()

@@ -31,7 +31,7 @@ class Display:
 		self.canvas = None
 		self.left = 0
 		self.top = 0
-		self.items: Items = None
+		self.items: Items = Items()
 		self.background_color = "#FFFFFF"  # White
 		self.foreground_color = "#000000"  # Black
 
