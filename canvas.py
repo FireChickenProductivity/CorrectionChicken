@@ -1,4 +1,4 @@
-from talon import canvas, ui, skia, Module, settings, actions
+from talon import canvas, ui, skia, Module, settings
 from talon.skia import Paint, Rect
 import math
 
@@ -50,7 +50,7 @@ class Display:
 		self.items = items
 	   
 	def show(self):
-		self.canvas = canvas.Canvas.from_screen(ui.screens()[0])
+		self.canvas = canvas.Canvas.from_screen(ui.screen_containing(self.left, self.top))
 		self.showing = True
 		self.canvas.register("draw", self.draw)
 		self.canvas.freeze()
