@@ -627,3 +627,5 @@ def update_display():
         items.line()
         items.text(current_editing_word_number_range)
     display.update(items)
+    if is_active:
+        display.refresh()

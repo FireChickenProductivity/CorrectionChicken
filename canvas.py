@@ -36,9 +36,7 @@ class Display:
 		self.foreground_color = "#000000"  # Black
 
 	def update(self, items: Items):
-		self.hide()
 		self.items = items
-		self.show()
 	   
 	def show(self):
 		self.canvas = canvas.Canvas.from_screen(ui.screens()[0])
