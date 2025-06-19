@@ -432,6 +432,7 @@ class Actions:
         if word_number is not None:
             actions.user.correction_chicken_set_current_number_range(word_number)
         replacement = "".join(characters)
+        actions.user.correction_chicken_set_replacement(replacement)
     
     def correction_chicken_set_replacement(new_replacement: str):
         """Set the replacement"""
@@ -630,7 +631,7 @@ def update_display():
         items.text(replacement)
     if current_editing_word_number_range:
         items.line()
-        items.text(current_editing_word_number_range)
+        items.text(str(current_editing_word_number_range))
     display.update(items)
     if is_active:
         display.refresh()
