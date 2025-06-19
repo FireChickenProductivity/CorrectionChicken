@@ -1,5 +1,6 @@
 from talon import canvas, ui, skia, Module, settings, actions
 from talon.skia import Paint, Rect
+import math
 
 module = Module()
 
@@ -60,7 +61,6 @@ class Display:
 		text_size = 10 * settings.get('user.correction_chicken_display_scale')
 		canvas.paint.textsize = text_size
 		canvas.paint.style = Paint.Style.FILL
-		canvas.paint.color = settings.get('user.correction_chicken_background_color')
 		height = 0
 		width = 0
 		for item in self.items.get_items():
@@ -72,12 +72,17 @@ class Display:
 		right = self.left + width + text_size
 		bottom = self.top + height * text_size * 1.5 + text_size
 		backround_rectangle = Rect(self.left, self.top, right - self.left, bottom - self.top)
+		outline_rectangle = Rect(self.left - 1, self.top - 1, right - self.left + 2, bottom - self.top + 2)
 		rounded_rectangle = skia.RoundRect.from_rect(backround_rectangle, x=10, y=10)
+		rounded_outline_rectangle = skia.RoundRect.from_rect(outline_rectangle, x=10, y=10)
 
+		canvas.paint.color = settings.get('user.correction_chicken_foreground_color')
+		canvas.draw_rrect(rounded_outline_rectangle)
+		canvas.paint.color = settings.get('user.correction_chicken_background_color')
 		canvas.draw_rrect(rounded_rectangle)
 		canvas.paint.color = settings.get('user.correction_chicken_foreground_color')
 		y = self.top + 0.5*text_size
-		for i, item in enumerate(self.items.get_items()):
+		for item in self.items.get_items():
 			if isinstance(item, str):
 				y += round(1.5*text_size)
 				canvas.draw_text(item, self.left + 0.5*text_size, y)
