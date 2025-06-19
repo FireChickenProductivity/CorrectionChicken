@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from talon import Module
+from talon import Module, app
 
 DISPLAY_CONFIGURATION_DIRECTORY = Path(__file__).parents[0] / "display_configuration"
 os.makedirs(DISPLAY_CONFIGURATION_DIRECTORY, exist_ok=True)
@@ -20,6 +20,11 @@ class Actions:
 		if DISPLAY_POSITION_FILE.exists():
 			with open(DISPLAY_POSITION_FILE, "r") as file:
 				content = file.read().strip()
-				left, top = map(int, content.split(","))
+				coordinates = content.split(",")
+				if len(coordinates) != 2 or \
+					not all(coord.isdigit() for coord in coordinates):
+					app.notify("The correction chicken file containing the position for the display has been corrupted. Resetting the display position with \"correction chicken move\" should fix this issue.")
+					return 0, 0
+				left, top = map(int, coordinates)
 				return left, top
 		return 0, 0
