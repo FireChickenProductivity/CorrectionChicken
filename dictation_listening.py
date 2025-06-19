@@ -10,9 +10,12 @@ if VOCABULARY_FILE.exists():
             word, count = line.strip().split(":")
             vocabulary[word.lower()] += int(count)
 
+last_words = []
 def on_phrase(j):
+    global last_words
     words = j.get("phrase")
-    if words:
+    if words and words != last_words:
+        last_words = words
         for word in words:
             vocabulary.update([word.lower()])
     actions.user.correction_chicken_update_last_phrase(actions.user.correction_chicken_get_last_phrase())
