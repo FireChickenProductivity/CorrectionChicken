@@ -589,8 +589,8 @@ class Actions:
     def correction_chicken_set_display_position_to_current_mouse_position():
         """Set the display position to the current mouse position"""
         global display
-        x = actions.mouse_x()
-        y = actions.mouse_y()
+        x = int(actions.mouse_x())
+        y = int(actions.mouse_y())
         display.set_position(x, y)
         have_graphics_handle_activity()
         update_display()

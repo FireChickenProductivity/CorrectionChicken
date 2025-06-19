@@ -72,4 +72,4 @@ case {user.correction_chicken_casing} <number_small>:
 case {user.correction_chicken_casing} <number_small> through <number_small>:
     user.correction_chicken_re_case_words(number_small_1, number_small_2, correction_chicken_casing)
 
-correction chicken move display: user.correction_chicken_set_display_position_to_current_mouse_position()
+correction chicken move [display]: user.correction_chicken_set_display_position_to_current_mouse_position()
