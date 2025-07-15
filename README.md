@@ -10,6 +10,12 @@ The last text dictated using the phrase community history is shown. The display 
 ## Homophones
 A word recognized as a homophone will be shown in the interface with an exclamation mark or star after its number. An exclamation mark means that there is only one known alternative. 
 
+Example:
+
+<img width="130" height="108" alt="example of how homophones are denoted" src="https://github.com/user-attachments/assets/d59bebcd-9366-4071-9d3e-2f6bfe99dd28" />
+
+One has an exclamation mark because there is only one alternative word. too has a star because there is more than one alternative. 
+
 Dictating `phony` followed by the number of a homophone will replace it with the next homophone in the list. This can be done multiple times to cycle through the homophones. 
 
 Dictating `phony (user.letter) (word number)` will replace the homophone with the alternative that has the specified letter the most number of times. 
