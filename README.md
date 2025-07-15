@@ -23,3 +23,31 @@ Dictating `phony (user.letter) (word number)` will replace the homophone with th
 Multiple letters can be dictated to use an alternative with that sequence of letters.
 
 The word number can be omitted for the last homophone dictated. If the word number is omitted when using multiple letters, the last word with an alternative containing that sequence of letters will be used.
+
+## Saving Manual Corrections
+A correction rule can be manually added to the correction_data directory in a .csv file. The first colum is the text to replace and the second column is the replacement text. 
+
+Example:
+```
+man,main,
+and put,input,
+wive,with,
+docks,docs,
+as,is,
+shodan,chicken,
+pole,pull,
+avoid,void,
+your,year,
+moth,month,
+```
+
+It would be inconvenient to have to open the file every time you want to save a correction, so there are commands for this documented below.
+
+Possible corrections using your manual rules will show up in the interface and can be accepted with `court (correction number)`. 
+
+Example:
+
+<img width="130" height="108" alt="example of how homophones are denoted" src="https://github.com/user-attachments/assets/d59bebcd-9366-4071-9d3e-2f6bfe99dd28" />
+
+`court 2` would replace too with tool.
+
