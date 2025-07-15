@@ -41,7 +41,7 @@ your,year,
 moth,month,
 ```
 
-It would be inconvenient to have to open the file every time you want to save a correction, so there are commands for this documented below.
+It would be inconvenient to have to open a file every time you want to save a correction, so there are commands for saving manual corrections documented below.
 
 Possible corrections using your manual rules will show up in the interface and can be accepted with `court (correction number)`. 
 
