@@ -59,6 +59,10 @@ phrasing <user.prose>:
 wording <user.word>:
     user.correction_chicken_set_replacement(word)
 
+wording <number_small> <user.word>:
+    user.correction_chicken_choose_word_for_replacement(number_small)
+    user.correction_chicken_set_replacement(word)
+
 correct that:
     user.correction_chicken_set_last_phrase_to_selected_text()
 
