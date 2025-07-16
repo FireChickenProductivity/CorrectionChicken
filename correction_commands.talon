@@ -20,7 +20,7 @@ remove <number_small>:
 smush <number_small>:
     user.correction_chicken_remove_separator(number_small)
 
-Eddie <number_small>:
+eddy <number_small>:
     user.correction_chicken_add_missing_text_to_the_end(number_small, "ed")
 
 phony [<number_small>]:
@@ -57,6 +57,10 @@ phrasing <user.prose>:
     user.correction_chicken_set_replacement(prose)
 
 wording <user.word>:
+    user.correction_chicken_set_replacement(word)
+
+wording <number_small> <user.word>:
+    user.correction_chicken_choose_word_for_replacement(number_small)
     user.correction_chicken_set_replacement(word)
 
 correct that:
