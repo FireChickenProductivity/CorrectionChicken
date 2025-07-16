@@ -58,3 +58,5 @@ Manual corrections require specifying what part of the text to replace and what 
 `spelling (letters)` specifies the replacement word. You can alternatively use `wording (word)` to avoid having to spell the word if it is in your vocabulary. `phrasing (phrase)` uses the dictated phrase for the correction.
 
 `replace` makes the correction without saving it, and `replace save` makes and saves the correction. 
+
+For convenience, a single word correction can be done with `spelling (word number) (letters)` or `wording (word number) (word)`.
