@@ -60,3 +60,16 @@ Manual corrections require specifying what part of the text to replace and what 
 `replace` makes the correction without saving it, and `replace save` makes and saves the correction. 
 
 For convenience, a single word correction can be done with `spelling (word number) (letters)` or `wording (word number) (word)`.
+
+## Convenience Commands for Common Misrecognition Patterns
+`trim (word number)` removes the last letter of the word. This is useful for situations where a word gets misrecognized as having an extra d or s at the end, such as an getting mis recognized as and.
+
+`chop (word number)` removes the last 2 letters of the word. 
+
+`eddy (word number)` makes the specified word end with "ed". 
+
+`plural (word number)` makes the specified word end with "s".
+
+`dual (word number)` makes the specified word end with "es".
+
+`remove (token number)` removes the specified token from the text.
