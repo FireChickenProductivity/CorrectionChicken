@@ -62,7 +62,7 @@ Manual corrections require specifying what part of the text to replace and what 
 For convenience, a single word correction can be done with `spelling (word number) (letters)` or `wording (word number) (word)`.
 
 ## Convenience Commands for Common Misrecognition Patterns
-`trim (word number)` removes the last letter of the word. This is useful for situations where a word gets misrecognized as having "an" extra d or s at the end, such as an getting misrecognized as "and".
+`trim (word number)` removes the last letter of the word. This is useful for situations where a word gets misrecognized as having an extra d or s at the end, such as "an" getting misrecognized as "and".
 
 `chop (word number)` removes the last 2 letters of the word. 
 
