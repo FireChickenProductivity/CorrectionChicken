@@ -7,6 +7,8 @@ Saying "correction chicken" toggles the commands on and off.
 ## Interface
 The last text dictated using the phrase community history is shown. The display can be moved to the current cursor position with the command `correction chicken move`. The display will temporarily disappear after a time out if the user does not dictate text or make corrections. The timeout can be adjusted by changing the `user.correction_chicken_graphics_time_out` setting. 
 
+To customize the interface, see settings.talon.
+
 ## Homophones
 A word recognized as a homophone will be shown in the interface with an exclamation mark or star after its number. An exclamation mark means that there is only one known alternative. 
 

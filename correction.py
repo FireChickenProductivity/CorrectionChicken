@@ -289,7 +289,7 @@ module.setting(
     'correction_chicken_graphics_time_out',
     type = float,
     default = 60,
-    desc = "How long to keep the correction chicken graphics open without a correction chicken command getting used in seconds"
+    desc = "How long to keep the correction chicken graphics open without a correction chicken command or dictation getting used in seconds"
 )
 graphics_timeout_job = None
 is_active: bool = False
