@@ -369,16 +369,7 @@ class Actions:
                 new_text += f"){tokens.get_token(i)}"
                 phrase_numbering += new_text
             
-            correction_matching_threshold = settings.get("user.correction_chicken_correction_percentage_match_threshold")
-            unfiltered_corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase)
-            corrections = []
-            for correction in unfiltered_corrections:
-                matching_tokens_length = tokens.get_overlapping_tokens_length(
-                    correction.starting_index,
-                    correction.starting_index + len(correction.original) - 1
-                )
-                if len(correction.original) > correction_matching_threshold*matching_tokens_length:
-                    corrections.append(correction)
+            corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase, tokens)
             
             correction_texts = [correction.original + " -> " + correction.replacement for correction in corrections]
             update_display()

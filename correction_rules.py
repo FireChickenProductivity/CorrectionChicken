@@ -1,8 +1,10 @@
-from talon import fs, Module
+from talon import fs, Module, settings
 import os
 from pathlib import Path
 import csv
 from typing import List
+
+from .correction import Tokens
 
 class Correction:
     __slots__ = ('starting_index', 'original', 'replacement', 'casing_override')
@@ -113,9 +115,19 @@ def compute_possible_corrections_for_text(text: str) -> list[Correction]:
 module = Module()
 @module.action_class
 class Actions:
-    def correction_chicken_compute_corrections_for_phrase(phrase: str) -> List[Correction]:
+    def correction_chicken_compute_corrections_for_phrase(phrase: str, tokens: Tokens) -> List[Correction]:
         """Compute corrections for the specified phrase"""
-        return compute_possible_corrections_for_text(phrase)
+        correction_matching_threshold = settings.get("user.correction_chicken_correction_percentage_match_threshold")
+        unfiltered_corrections = compute_possible_corrections_for_text(phrase)
+        corrections = []
+        for correction in unfiltered_corrections:
+            matching_tokens_length = tokens.get_overlapping_tokens_length(
+                correction.starting_index,
+                correction.starting_index + len(correction.original) - 1
+            )
+            if len(correction.original) > correction_matching_threshold*matching_tokens_length:
+                corrections.append(correction)
+        return corrections
 
     def correction_chicken_add_correction_rule(original: str, replacement: str, case_override: str=""):
         """Add a correction rule"""
