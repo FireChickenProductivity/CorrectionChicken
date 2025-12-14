@@ -32,6 +32,7 @@ def is_token_over(token, next_character, next_next_character):
             (last_character.islower() and next_character.isupper())
 
 class Tokens:
+    __slots__ = ('tokens', 'spacing', 'word_indexes', 'spaces', 'token')
     def _add_token(self):
         self.tokens.append(self.token)
         if len(self.tokens) > 1:
@@ -111,7 +112,34 @@ class Tokens:
                         self.tokens.pop(index + 1) 
                         #Remove the spacing for the removed separator
                         self.spacing.pop(index)
-                        
+    
+    def get_overlapping_tokens_length(
+        self,
+        original_text_start_index: int,
+        original_text_final_index) -> int:
+        """Finds the length of the tokens corresponding to the indexes in the original text"""
+        if original_text_start_index > original_text_final_index:
+            raise ValueError(f"Received start index {original_text_start_index} exceeding final index {original_text_final_index}")
+        current_length = 0
+        start_index = None
+        ending_index = None
+        # when the total length found so far exceeds one of the original indexes
+        # we have found the containing token
+        for i, token in enumerate(self.tokens):
+            current_length += len(token) + len(self.spacing[i])
+            if start_index is None and current_length > original_text_start_index:
+                start_index = i
+            if ending_index is None and current_length > original_text_final_index:
+                ending_index = i + 1
+        if start_index is None or ending_index is None:
+            # fail quietly
+            return 0
+        count: int = 0
+        for i in range(start_index, ending_index):
+            count += len(self.tokens[i])
+            count += len(self.spacing[i])
+        return count
+
     def __repr__(self):
         return self.__str__()
     
@@ -291,6 +319,12 @@ module.setting(
     default = 60,
     desc = "How long to keep the correction chicken graphics open without a correction chicken command or dictation getting used in seconds"
 )
+module.setting(
+    'correction_chicken_correction_percentage_match_threshold',
+    type = float,
+    default = 0.5,
+    desc = "Requires a correction option to match more than this percentage of a word. 0.0 means show all options."
+)
 graphics_timeout_job = None
 is_active: bool = False
 
@@ -334,8 +368,18 @@ class Actions:
                     new_text += "*"
                 new_text += f"){tokens.get_token(i)}"
                 phrase_numbering += new_text
-                
-            corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase)
+            
+            correction_matching_threshold = settings.get("user.correction_chicken_correction_percentage_match_threshold")
+            unfiltered_corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase)
+            corrections = []
+            for correction in unfiltered_corrections:
+                matching_tokens_length = tokens.get_overlapping_tokens_length(
+                    correction.starting_index,
+                    correction.starting_index + len(correction.original) - 1
+                )
+                if len(correction.original) > correction_matching_threshold*matching_tokens_length:
+                    corrections.append(correction)
+            
             correction_texts = [correction.original + " -> " + correction.replacement for correction in corrections]
             update_display()
 

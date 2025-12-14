@@ -5,16 +5,24 @@ import csv
 from typing import List
 
 class Correction:
+    __slots__ = ('starting_index', 'original', 'replacement', 'casing_override')
     def __init__(self, starting_index, original, replacement, casing_override):
         self.starting_index = starting_index
         self.original = original
         self.replacement = replacement
         self.casing_override = casing_override
     
+    def __repr__(self):
+        return self.__str__()
+    
+    def __str__(self):
+        return f"Correction(at {self.starting_index}:{self.original}->{self.replacement} Casing Override: {self.casing_override})"
+
 STANDARD_CASING = ''
 EXACT_CASING = 'exact'
 
 class SimpleCorrectionRule:
+    __slots__ = ('original', 'replacement', 'case_override')
     def __init__(self, original: str, replacement: str, case_override: str):
         self.original = original
         self.replacement = replacement
@@ -53,6 +61,7 @@ def get_correction_file_names():
     return absolute_names
 
 class SimpleCorrectionRules:
+    __slots__ = ('rules')
     def __init__(self):
         self.rules = {}
         file_names = get_correction_file_names()
@@ -71,7 +80,7 @@ class SimpleCorrectionRules:
             self.rules[rule.get_original()] = []
         self.rules[rule.get_original()].append(rule)
     
-    def compute_corrections_for_text(self, text: str, starting_index):
+    def compute_corrections_for_text(self, text: str, starting_index) -> list[Correction]:
         corrections = []
         lower_case_text: str = text.lower()
         if lower_case_text in self.rules:
@@ -93,7 +102,7 @@ def compute_every_sub_string(text: str):
         for j in range(i + 1, len(text) + 1):
             yield (i, text[i:j])
  
-def compute_possible_corrections_for_text(text: str):
+def compute_possible_corrections_for_text(text: str) -> list[Correction]:
     corrections = []
     lower_case_text: str = text.lower()
     sub_strings = compute_every_sub_string(lower_case_text)
