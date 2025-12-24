@@ -14,6 +14,7 @@ replacement: str = ""
 current_editing_word_number_range = None
 display = Display()
 
+# on startup, load the position for the display from disk
 def on_ready():
     top, right = actions.user.correction_chicken_load_display_position()
     display.set_position(top, right)
