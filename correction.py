@@ -1,16 +1,16 @@
 from talon import Module, actions, Context, cron, settings, app
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Optional
 from .tokenization import Tokens
 from .canvas import Display, Items
 
-MINIMUM_CORRECTION_LINE_LENGTH = 20
+MINIMUM_CORRECTION_LINE_LENGTH: int = 20
 
-last_phrase = ""
-phrase_numbering = ""
-tokens = None
-corrections = []
-correction_texts = []
-replacement = ""
+last_phrase: str = ""
+phrase_numbering: str = ""
+tokens: Optional[Tokens] = None
+corrections: list = []
+correction_texts: list[str] = []
+replacement: str = ""
 current_editing_word_number_range = None
 display = Display()
 
