@@ -1,6 +1,5 @@
 from talon import canvas, ui, skia, Module, settings
 from talon.skia import Paint, Rect
-import math
 
 module = Module()
 
