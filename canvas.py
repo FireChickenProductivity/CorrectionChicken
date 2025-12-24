@@ -25,6 +25,7 @@ module.setting(
 class VerticalBar: pass
 
 class Items:
+	__slots__ = ('items')
 	def __init__(self):
 		self.items = []
 	
@@ -38,6 +39,7 @@ class Items:
 		return self.items
 
 class Display:
+	__slots__ = ('canvas', 'left', 'top', 'items', 'showing')
 	def __init__(self):
 		self.canvas = None
 		self.left = 0
