@@ -63,7 +63,7 @@ Manual corrections require specifying what part of the text to replace and what 
 
 For convenience, a single word correction can be done with `spelling (word number) (letters)` or `wording (word number) (word)`.
 
-When words match a correction rule, the rule is only shown as a correction option if the number of the characters in the relevant words that match the rule divided by the total number of characters in the relevant words exceeds the `user.correction_chicken_correction_percentage_match_threshold` setting. This is 0.5 by default requiring more than half of the characters in the relevant words match. If a correction rule matches only a single word, then more than that percentage of a word must match for the corresponding correction option to be shown. 
+Correction Chicken divides up text into tokens. Every word and every consecutive sequence of non-alphabetic characters is considered a separate token. When a series of tokens matches a correction rule, the rule is only shown as a correction option if the number of the characters in the relevant tokens that match the rule divided by the total number of characters in the relevant tokens exceeds the `user.correction_chicken_correction_percentage_match_threshold` setting. This is 0.5 by default requiring more than half of the characters in the relevant tokens match. If a correction rule matches only a single word, then more than that percentage of a word must match for the corresponding correction option to be shown. 
 
 ## Convenience Commands for Common Misrecognition Patterns
 `trim (word number)` removes the last letter of the word. This is useful for situations where a word gets misrecognized as having an extra d or s at the end, such as "an" getting misrecognized as "and".
