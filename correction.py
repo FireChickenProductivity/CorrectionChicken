@@ -21,19 +21,24 @@ def on_ready():
     display.set_position(top, right)
 app.register("ready", on_ready)
 
-def compute_biggest_prefix_size_at_the_end_of_text(text, prefix):
+def compute_biggest_prefix_size_at_the_end_of_text(text: str, prefix: str) -> int:
+    """Compute biggest common prefix length between the prefix and the string"""
     for i in range(len(prefix), 0, -1):
         if text.endswith(prefix[:i]):
             return i
     return 0
 
 def compute_number_of_leading_spaces(text: str) -> int:
+    """Compute number of spaces at the start of the text"""
     number_of_leading_spaces = 0
     while number_of_leading_spaces < len(text) and text[number_of_leading_spaces].isspace():
         number_of_leading_spaces += 1
     return number_of_leading_spaces
 
 def compute_common_prefix_size(a: str, b: str) -> int:
+    """Compute the number of consecutive characters starting from the first index
+        that a and b have in common
+    """
     size = 0
     minimum_length = min(len(a), len(b))
     while size < minimum_length and a[size] == b[size]:
@@ -41,6 +46,7 @@ def compute_common_prefix_size(a: str, b: str) -> int:
     return size
 
 def replace_text_through_deletion_and_insertion(original: str, replacement: str):
+    """Use key presses to replace the original with the replacement"""
     common_prefix_size = compute_common_prefix_size(original, replacement)
     for _ in range(len(original) - common_prefix_size):
         actions.edit.delete()
