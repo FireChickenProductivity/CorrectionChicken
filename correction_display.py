@@ -1,4 +1,4 @@
-# provides code for updating the correction graphical interface
+# provides code for the correction graphical interface
 
 from talon import actions, Module, app, cron, settings, Context
 from .canvas import Display, Items
@@ -6,6 +6,7 @@ from .canvas import Display, Items
 MINIMUM_CORRECTION_LINE_LENGTH: int = 20
 
 display = Display()
+# times out graphical interface after inactivity passes setting threshold
 graphics_timeout_job = None
 is_active: bool = False
 context = Context()
@@ -17,6 +18,9 @@ def on_ready():
 app.register("ready", on_ready)
 
 def have_graphics_handle_activity():
+	"""In response to user activity relevant to the graphical interface,
+		make sure that the interface is showing and reset the timeout job
+	"""
 	global graphics_timeout_job
 	if graphics_timeout_job:
 		cron.cancel(graphics_timeout_job)
@@ -27,25 +31,32 @@ def have_graphics_handle_activity():
 		graphics_timeout_job = cron.after(f"{time_out_amount}s", display.hide)
 
 def cancel_graphics_timeout_job():
+	"""Stop job that hides the user interface after time out"""
 	global graphics_timeout_job
 	if graphics_timeout_job:
 		cron.cancel(graphics_timeout_job)
 		graphics_timeout_job = None
 
 def compute_correction_text_with_numbering(index, text):
+	"""Show text corresponding to a correction option"""
 	return f"{index + 1}. {text}"
 
 def show_correction_options(phrase_numbering, correction_texts, items: Items):
+	"""Show text representing the correction options"""
 	correction_line = ""
 	for index, correction_text in enumerate(correction_texts):
 		option_text = compute_correction_text_with_numbering(index, correction_text)
+		# if text for the current line has been computed and there is adequate room,
+		# add new option to current line
 		if correction_line and len(correction_line) + len(option_text) + 1 < max(len(phrase_numbering), MINIMUM_CORRECTION_LINE_LENGTH):
 			correction_line += " " + option_text
+		# otherwise start a new line
 		else:
 			if correction_line:
 				items.text(correction_line)
 				correction_line = ""
 			correction_line = option_text
+	# makes sure last line gets displayed
 	if correction_line:
 		items.text(correction_line)
 
@@ -54,6 +65,7 @@ def update_display(
 	replacement: str,
 	correction_texts: list[str],
 	current_editing_word_number_range):
+	"""Update display in response to new text to correct"""
 	items = Items()
 	items.text(phrase_numbering)
 	items.line()
