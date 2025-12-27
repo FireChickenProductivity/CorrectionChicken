@@ -64,6 +64,7 @@ class Tokens:
 		# makes sure the last token is included
 		if token:
 			self._add_token(token, spaces)
+			spaces = ""
 		self.spacing.append(spaces)
 
 	def get_token(self, index: int) -> str:
