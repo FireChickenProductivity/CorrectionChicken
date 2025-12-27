@@ -1,3 +1,7 @@
+# Provides support for graphics
+# provides a high level interface to a low level canvas
+# the rest of the project relies on this for displaying information
+
 from talon import canvas, ui, skia, Module, settings
 from talon.skia import Paint, Rect
 

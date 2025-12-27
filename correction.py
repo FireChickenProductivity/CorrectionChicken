@@ -1,10 +1,8 @@
 from talon import Module, actions, Context, cron, settings, app
 from typing import List, Union, Tuple, Optional
 from .tokenization import Tokens
-from .canvas import Display, Items
 from .casing import apply_speakable_casing, Casing, replace_tokens_with_matching_casing
-
-MINIMUM_CORRECTION_LINE_LENGTH: int = 20
+from .correction_display import update_display, have_graphics_handle_activity
 
 last_phrase: str = ""
 phrase_numbering: str = ""
@@ -13,13 +11,6 @@ corrections: list = []
 correction_texts: list[str] = []
 replacement: str = ""
 current_editing_word_number_range = None
-display = Display()
-
-# on startup, load the position for the display from disk
-def on_ready():
-    top, right = actions.user.correction_chicken_load_display_position()
-    display.set_position(top, right)
-app.register("ready", on_ready)
 
 def compute_biggest_prefix_size_at_the_end_of_text(text: str, prefix: str) -> int:
     """Compute biggest common prefix length between the prefix and the string"""
@@ -74,7 +65,6 @@ module = Module()
 module.list("correction_chicken_casing", desc="Casing options")
 module.tag("correction_chicken_replacement", desc="Enables replacement commands for correction chicken")
 module.tag("correction_chicken", desc="Activates correction chicken commands")
-context = Context()
 replacement_context = Context()
 
 module.setting(
@@ -95,24 +85,6 @@ module.setting(
     default = 0,
     desc = "How many lines to search for the text to correct in the document using selection. 0 means not searching at all."
 )
-graphics_timeout_job = None
-is_active: bool = False
-
-def have_graphics_handle_activity():
-    global graphics_timeout_job
-    if graphics_timeout_job:
-        cron.cancel(graphics_timeout_job)
-    if is_active and not display.is_showing():
-        display.show()
-    time_out_amount = settings.get("user.correction_chicken_graphics_time_out")
-    if time_out_amount > 0:
-        graphics_timeout_job = cron.after(f"{time_out_amount}s", display.hide)
-
-def cancel_graphics_timeout_job():
-    global graphics_timeout_job
-    if graphics_timeout_job:
-        cron.cancel(graphics_timeout_job)
-        graphics_timeout_job = None
 
 @module.action_class
 class Actions:
@@ -142,7 +114,7 @@ class Actions:
             corrections = actions.user.correction_chicken_compute_corrections_for_phrase(phrase, tokens)
             
             correction_texts = [correction.original + " -> " + correction.replacement for correction in corrections]
-            update_display()
+            update_correction_display()
 
     def correction_chicken_set_last_phrase_to_selected_text():
         """Set the last phrase to the selected text"""
@@ -194,19 +166,6 @@ class Actions:
         tokens.set_token(word_number - 1, new_token)
         actions.user.correction_chicken_replace_text_with_tokens()
 
-    def correction_chicken_toggle():
-        """Toggles correction chicken"""
-        global is_active
-        if is_active:
-            context.tags = []
-            display.hide()
-            cancel_graphics_timeout_job()
-        else:
-            context.tags = ["user.correction_chicken"]
-            display.show()
-            have_graphics_handle_activity()
-        is_active = not is_active
-    
     def correction_chicken_remove_word(word_number: int):
         """Remove the specified word"""
         global tokens
@@ -233,7 +192,7 @@ class Actions:
         global current_editing_word_number_range
         current_editing_word_number_range = range
         actions.user.correction_chicken_activate_replacement_context()
-        update_display()
+        update_correction_display()
 
     def correction_chicken_spell_out_alternative_for_word(characters: List[str], word_number: int=None):
         """Spell out the alternative for the specified word"""
@@ -248,7 +207,7 @@ class Actions:
         have_graphics_handle_activity()
         global replacement
         replacement = new_replacement
-        update_display()
+        update_correction_display()
 
     def correction_chicken_choose_word_for_replacement(word_number: int):
         """Update the current word for replacement"""
@@ -401,46 +360,9 @@ class Actions:
         """Change the casing of the specified word"""
         actions.user.correction_chicken_re_case_words(word_number, word_number, casing)
     
-    def correction_chicken_set_display_position_to_current_mouse_position():
-        """Set the display position to the current mouse position"""
-        global display
-        x = int(actions.mouse_x())
-        y = int(actions.mouse_y())
-        display.set_position(x, y)
-        actions.user.correction_chicken_save_display_position(x, y)
-        have_graphics_handle_activity()
-        update_display()
-
-def compute_correction_text_with_numbering(index, text):
-    return f"{index + 1}. {text}"
-
-def show_correction_options(phrase_numbering, correction_texts, items: Items):
-    correction_line = ""
-    for index, correction_text in enumerate(correction_texts):
-        option_text = compute_correction_text_with_numbering(index, correction_text)
-        if correction_line and len(correction_line) + len(option_text) + 1 < max(len(phrase_numbering), MINIMUM_CORRECTION_LINE_LENGTH):
-            correction_line += " " + option_text
-        else:
-            if correction_line:
-                items.text(correction_line)
-                correction_line = ""
-            correction_line = option_text
-    if correction_line:
-        items.text(correction_line)
-
-def update_display():
-    global last_phrase, phrase_numbering, replacement, current_editing_word_number_range, tokens
-    items = Items()
-    items.text(phrase_numbering)
-    items.line()
-
-    show_correction_options(phrase_numbering, correction_texts, items)
-    if replacement:
-        items.line()
-        items.text(replacement)
-    if current_editing_word_number_range:
-        items.line()
-        items.text(str(current_editing_word_number_range))
-    display.update(items)
-    if is_active:
-        display.refresh()
+def update_correction_display():
+    update_display(phrase_numbering,
+                   replacement,
+                   correction_texts,
+                   current_editing_word_number_range
+                   )
