@@ -77,3 +77,6 @@ Correction Chicken divides up text into tokens. Every word and every consecutive
 `dual (word number)` makes the specified word end with "es".
 
 `remove (token number)` removes the specified token from the text.
+
+## Finding Text to Replace
+By default, Correction Chicken assumes that you have not moved the cursor after dictating the text to correct. Corrections are therefore made by deletion and typing text. The `user.correction_chicken_correction_hunt_distance` setting can be used to set the number of lines that Correction Chicken will search for the original text. With that setting above 0, Correction Chicken assumes that the first occurrence found is what you intend to correct. This assumes that line correction edit actions and copy/paste edit actions are implemented for the current application.
