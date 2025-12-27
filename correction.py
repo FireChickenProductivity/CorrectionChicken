@@ -54,6 +54,22 @@ def replace_text_through_deletion_and_insertion(original: str, replacement: str)
     trimmed_replacement = replacement[common_prefix_size:]
     actions.insert(trimmed_replacement)
 
+def replace_text_through_selection_and_pasting(original: str, replacement: str, line_limit: int):
+    actions.edit.extend_line_start()
+    text: str = actions.edit.selected_text()
+    remaining_lines = line_limit - 1
+    while original not in text and remaining_lines > 0:
+        actions.edit.extend_line_up()
+        actions.edit.extend_line_start()
+        text = actions.edit.selected_text()
+        remaining_lines -= 1
+    original_location = text.rfind(original)
+    if original_location > -1:
+        new_text = text[:original_location] + replacement + text[original_location + len(original):]
+        actions.user.paste(new_text)
+    else:
+        actions.edit.right()
+
 module = Module()
 module.list("correction_chicken_casing", desc="Casing options")
 module.tag("correction_chicken_replacement", desc="Enables replacement commands for correction chicken")
@@ -72,6 +88,12 @@ module.setting(
     type = float,
     default = 0.5,
     desc = "Requires a correction option to match more than this percentage of a word. 0.0 means show all options."
+)
+module.setting(
+    'correction_chicken_correction_hunt_distance',
+    type = int,
+    default = 0,
+    desc = "How many lines to search for the text to correct in the document using selection. 0 means not searching at all."
 )
 graphics_timeout_job = None
 is_active: bool = False
@@ -131,7 +153,11 @@ class Actions:
     def correction_chicken_replace_text(replacement: str):
         """Replace the phrase with the specified text"""
         global last_phrase
-        replace_text_through_deletion_and_insertion(last_phrase, replacement)
+        line_limit = settings.get("user.correction_chicken_correction_hunt_distance")
+        if line_limit > 0:
+            replace_text_through_selection_and_pasting(last_phrase, replacement, line_limit)
+        else:
+            replace_text_through_deletion_and_insertion(last_phrase, replacement)
         actions.user.correction_chicken_update_last_phrase(replacement)
 
     def correction_chicken_replace_text_with_tokens():

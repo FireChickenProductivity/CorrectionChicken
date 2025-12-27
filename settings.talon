@@ -8,3 +8,4 @@ settings():
 	#Timeout is in seconds
 	user.correction_chicken_graphics_time_out = 60
 	user.correction_chicken_correction_percentage_match_threshold = 0.5
+	user.correction_chicken_correction_hunt_distance = 0
