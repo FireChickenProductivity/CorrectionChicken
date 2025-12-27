@@ -61,7 +61,7 @@ def show_correction_options(phrase_numbering, correction_texts, items: Items):
 		items.text(correction_line)
 
 def update_display(
-	phrase_numbering,
+	phrase_numbering: str,
 	replacement: str,
 	correction_texts: list[str],
 	current_editing_word_number_range):
