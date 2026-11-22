@@ -352,7 +352,8 @@ class Actions:
         phrase = phrase.lstrip()
         if phrase != last_phrase:
             have_graphics_handle_activity()
-            actions.user.correction_chicken_set_last_phrase(phrase)
+            if phrase != actions.user.correction_chicken_get_last_phrase():
+                actions.user.correction_chicken_set_last_phrase(phrase)
             tokens = Tokens(phrase)
             last_phrase = phrase
             phrase_numbering = ""
